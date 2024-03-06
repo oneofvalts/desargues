@@ -1,9 +1,13 @@
--- This module serves as the root of the `Desargues` library.
--- Import modules here that should be built as part of the library.
-import «Desargues».Basic
 import Mathlib.LinearAlgebra.Projectivization.Basic
+import Mathlib.LinearAlgebra.Projectivization.Independence
 
 variable [DivisionRing K] [AddCommGroup V] [Module K V]
+
+def index (X Y Z : Projectivization K V) : Fin 3 → Projectivization K V :=
+fun i : Fin 3 => match i with
+| 0 => X
+| 1 => Y
+| 2 => Z
 
 class ProjectiveGeometry (point : Type u) where
 ell : point → point → point → Prop
@@ -14,25 +18,28 @@ l3  : ∀ a b c d p, ell p a b → ell p c d → ∃ q : point, ell q a c ∧ el
 -- Every Projectivization is a ProjectiveGeometry
 instance : ProjectiveGeometry (Projectivization K V) :=
 ⟨
-fun X Y Z => ∃ k1 k2 k3 : K, ¬(k1 = 0 ∧ k2 = 0 ∧ k3 = 0)
-∧ k1•X.rep + k2•Y.rep + k3•Z.rep = 0,
+-- fun X Y Z => ∃ k1 k2 k3 : K, ¬(k1 = 0 ∧ k2 = 0 ∧ k3 = 0) ∧ k1•X.rep + k2•Y.rep + k3•Z.rep = 0,
+-- fun X Y Z => ¬ LinearIndependent K ![X.rep, Y.rep, Z.rep],
+fun X Y Z => ¬ Projectivization.Independent (index X Y Z),
 
-by
-intro A B
-use 1, 0, -1
-constructor
-intro eq
-aesop
-simp,
+-- by
+-- intro A B
+-- use 1, 0, -1
+-- constructor
+-- intro eq
+-- aesop
+-- simp,
+--
+-- by
+-- intros A B P Q
+-- intro APQreside BPQreside PnotQ
+-- rcases APQreside with ⟨ka, kp, kq, apqknotzero, apqcomb⟩
+-- rcases BPQreside with ⟨kb, kkp, kkq, bpqknotzero, bpqcomb⟩
+-- obtain rfl | kqnotzero := eq_or_ne kq 0
+-- done
+-- ,
 
-by
-intros A B P Q
-intro APQreside BPQreside PnotQ
-rcases APQreside with ⟨ka, kp, kq, apqknotzero, apqcomb⟩
-rcases BPQreside with ⟨kb, kkp, kkq, bpqknotzero, bpqcomb⟩
-obtain rfl | kqnotzero := eq_or_ne kq 0
-done
-,
-
+sorry,
+sorry,
 sorry
 ⟩
