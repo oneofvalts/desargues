@@ -2,7 +2,7 @@ import Mathlib.LinearAlgebra.Projectivization.Basic
 import Mathlib.LinearAlgebra.Projectivization.Independence
 
 namespace Desargues
-open Set Submodule FiniteDimensional Projectivization
+open Finset Set Submodule FiniteDimensional Projectivization
 open scoped LinearAlgebra.Projectivization
 
 variable [DivisionRing K] [AddCommGroup V] [Module K V] [DecidableEq V] [StrongRankCondition K]
@@ -60,6 +60,8 @@ rw [or_comm]
 theorem l2_rep (a b p q : V) (apq_dep : ¬ LinearIndependent K ![a, p, q])
 (bpq_dep : ¬ LinearIndependent K ![b, p, q]) (pq_indep : LinearIndependent K ![p, q]) :
 ¬ LinearIndependent K ![a, b, p] := by
+-- p and q are not the same points.
+have pq_neq : p ≠ q := by sorry
 -- a,b,p,q are in the span of p,q.
 have a_span_pq : a ∈ span K {p, q} := by {
 apply lin_dep_imp_span a p q pq_indep apq_dep
@@ -76,7 +78,13 @@ have q_span_pq : q ∈ span K {p, q} := by {
 apply lin_dep_imp_span q p q pq_indep qpq_dep
 }
 intro abp_dep
-have pq_span_dim_ineq : finrank K {p, q} ≤ 2 := by apply finrank_span_finset_le_card (toFinset {p, q})
+have pq_span_dim_ineq (p q : V) (pq_diff : p ≠ q) : Set.finrank (R := K) (toSet {p, q}) ≤ 2 := by {
+have pq_card : (card {p, q}) = 2 := by aesop
+rw [<- pq_card]
+apply finrank_span_finset_le_card {p, q}
+}
+apply pq_span_dim_ineq at pq_neq
+
 
 -- Every Projectivization is a ProjectiveGeometry
 instance : ProjectiveGeometry (ℙ K V) :=
