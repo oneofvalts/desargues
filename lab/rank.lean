@@ -16,22 +16,26 @@ have pq_card : (card {p, q}) = 2 := by aesop
 rw [<- pq_card]
 apply finrank_span_finset_le_card {p, q}
 
-theorem test (p q : V) (a b : (span K ({p, q} : Finset V).toSet)) (ab_neq : a ≠ b):
+theorem test (p q : V) (a b : (span K ({p, q} : Finset V).toSet)) (ab_neq : a ≠ b) :
 ({a, b} : Finset (span K ({p, q} : Finset V).toSet)).card = 2 := by aesop
 
-theorem abp_rank_le_span_rank (p q : V)
-(a b : (span K ({p, q} : Finset V).toSet)) (ab_neq : a ≠ b)
-(pq_diff : p ≠ q)
-(abp_indep : LinearIndependent K ![a, b]) :
--- (a_span_pq : a ∈ (span K ({p, q} : Finset V).toSet))
--- (b_span_pq : b ∈ (span K ({p, q} : Finset V).toSet)) :
-({a, b} : Finset (span K ({p, q} : Finset V).toSet)).card ≤
+example (p q : V) : Set.Finite {p, q} := by aesop
+
+-- #print span_of_finite
+-- #print Module.Finite.span_of_finite
+
+theorem abp_rank_le_span_rank (a b p q : V)
+(pq_neq : p ≠ q)
+(abp_indep : LinearIndependent K ![a, b, p])
+(a_span_pq : a ∈ (span K ({p, q} : Finset V).toSet))
+(b_span_pq : b ∈ (span K ({p, q} : Finset V).toSet)) :
+({a, b, p} : Finset (span K ({p, q} : Finset V).toSet)).card ≤
 finrank K (span K ({p, q} : Finset V).toSet) := by
 set M := span K ({p, q} : Finset V).toSet
 letI : FiniteDimensional K M := span_finset K {p, q}
-apply finset_card_le_finrank (R := K) (M := M) {a, b}
+apply finset_card_le_finrank (R := K) (M := M) {a, b, p}
 -- overloaded, errors
 --   failed to synthesize instance
 --     Singleton V (Finset ↥(span K ↑{p, q}))
 --
---   32:2 'a' is not a field of structure 'Finset'
+--   28:2 'a' is not a field of structure 'Finset'

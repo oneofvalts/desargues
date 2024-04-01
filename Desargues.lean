@@ -106,16 +106,16 @@ done,
 
 by
 intro A B P Q
-intro ABPcollinear BPQcollinear PneqQ
-rw [independent_iff, rep_comp_3] at ABPcollinear
-rw [independent_iff, rep_comp_3] at BPQcollinear
-rw [<- independent_pair_iff_neq] at PneqQ
-rw [independent_iff, rep_comp_2] at PneqQ
+intro ABPcol BPQcol PQ_neq
+rw [independent_iff, rep_comp_3] at ABPcol
+rw [independent_iff, rep_comp_3] at BPQcol
+rw [<- independent_pair_iff_neq] at PQ_neq
+rw [independent_iff, rep_comp_2] at PQ_neq
 rw [independent_iff, rep_comp_3]
 apply l2_rep A.rep B.rep P.rep Q.rep
-exact ABPcollinear
-exact BPQcollinear
-exact PneqQ
+exact ABPcol
+exact BPQcol
+exact PQ_neq
 done,
 
 sorry
