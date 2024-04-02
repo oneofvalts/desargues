@@ -84,6 +84,7 @@ rw [<- pq_card]
 apply finrank_span_finset_le_card {p, q}
 }
 apply pq_span_dim_ineq at pq_neq
+sorry
 
 
 -- Every Projectivization is a ProjectiveGeometry
