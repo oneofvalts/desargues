@@ -12,6 +12,8 @@ package «desargues» where
 require mathlib from git
   "https://github.com/leanprover-community/mathlib4.git"
 
+lean_lib «PV» where
+
 @[default_target]
 lean_lib «Desargues» where
   -- add any library configuration options here

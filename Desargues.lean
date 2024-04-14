@@ -1,125 +1,127 @@
-import Mathlib.LinearAlgebra.Projectivization.Basic
-import Mathlib.LinearAlgebra.Projectivization.Independence
+import Mathlib.Tactic
 
 namespace Desargues
-open Finset Set Submodule FiniteDimensional Projectivization
-open scoped LinearAlgebra.Projectivization
 
-variable [DivisionRing K] [AddCommGroup V] [Module K V] [DecidableEq V] [StrongRankCondition K]
+variable [DecidableEq G]
 
--- def indexer_generator (X Y Z : ℙ K V) : Fin 3 → ℙ K V :=
--- fun i : Fin 3 => match i with
--- | 0 => X
--- | 1 => Y
--- | 2 => Z
---
--- def coeff_indexer (k1 k2 k3 : K) : Fin 3 → K :=
--- fun i : Fin 3 => match i with
--- | 0 => k1
--- | 1 => k2
--- | 2 => k3
+-- A projective geometry is a set G together with a ternary relation
+-- ℓ ⊆ G × G × G satisfying L₁, L₂ and L₃. (p. 26)
+class ProjectiveGeometry
+  (G : Type u) where
+  ell : G → G → G → Prop
+  l1  : ∀ a b, ell a b a
+  l2  : ∀ a b p q, ell a p q → ell b p q → p ≠ q → ell a b p
+  l3  : ∀ a b c d p, ell p a b → ell p c d → ∃ q : G, ell q a c ∧ ell q b d
 
-class ProjectiveGeometry (point : Type u) where
-ell : point → point → point → Prop
-l1  : ∀ a b, ell a b a
-l2  : ∀ a b p q, ell a p q → ell b p q → p ≠ q → ell a b p
-l3  : ∀ a b c d p, ell p a b → ell p c d → ∃ q : point, ell q a c ∧ ell q b d
+-- Any ternary relation ℓ which satisfies L₁ and L₂ is symmetric. From
+-- "ℓ(a, b, c)", ell feeded with any permutations of "abc" can be proved.
+-- First, "acb" and "cab" will be derived. These cycles will generate the
+-- group of permutations of three objects. (p. 27)
+theorem rel_sym_acb
+  {G : Type u}
+  {PG : ProjectiveGeometry G}
+  (a b c : G)
+  (abc_col : PG.ell a b c) :
+    PG.ell a c b := by
+  obtain rfl | bc_neq := eq_or_ne b c
+  · exact abc_col -- b = c, meaning abc and acb becomes abb
+  · apply PG.l2 a c b c
+    · exact abc_col
+    · apply PG.l1 c b
+    · exact bc_neq
 
--- Lemmas for distribution of composition.
-theorem rep_comp_3 (X Y Z : ℙ K V) :
-Projectivization.rep ∘ ![X, Y, Z] = ![X.rep, Y.rep, Z.rep] := by
-exact List.ofFn_inj.mp rfl
+theorem rel_sym_cab
+  {G : Type u}
+  {PG : ProjectiveGeometry G}
+  (a b c : G)
+  (abc_col : PG.ell a b c) :
+    PG.ell c a b := by
+  obtain rfl | bc_neq := eq_or_ne b c
+  · apply PG.l1 b a
+  · apply PG.l2 c a b c
+    · apply PG.l1 c b
+    · exact abc_col
+    · exact bc_neq
 
-theorem rep_comp_2 (X Y : ℙ K V) :
-Projectivization.rep ∘ ![X, Y] = ![X.rep, Y.rep] := by
-exact List.ofFn_inj.mp rfl
+-- Now we can easily generate the other three.
+theorem rel_sym_bca
+  {G : Type u}
+  {PG : ProjectiveGeometry G}
+  (a b c : G)
+  (abc_col : PG.ell a b c) :
+    PG.ell b c a := by
+  apply rel_sym_cab c a b
+  apply rel_sym_cab a b c
+  exact abc_col
 
-theorem lin_dep_aab (a b : V) : ¬ LinearIndependent K ![a, a, b] := by
-intro aab_dep
-rw [linearIndependent_iff'] at aab_dep
-specialize aab_dep {0, 1, 2} ![1, -1, 0]
-aesop
+theorem rel_sym_bac
+  {G : Type u}
+  {PG : ProjectiveGeometry G}
+  (a b c : G)
+  (abc_col : PG.ell a b c) :
+    PG.ell b a c := by
+  apply rel_sym_cab a c b
+  apply rel_sym_acb a b c
+  exact abc_col
 
-theorem lin_dep_aba (a b : V) : ¬ LinearIndependent K ![a, b, a] := by
-intro aab_dep
-rw [linearIndependent_iff'] at aab_dep
-specialize aab_dep {0, 1, 2} ![1, 0, -1]
-aesop
+theorem rel_sym_cba
+  {G : Type u}
+  {PG : ProjectiveGeometry G}
+  (a b c : G)
+  (abc_col : PG.ell a b c) :
+    PG.ell c b a := by
+  apply rel_sym_cab b a c
+  apply rel_sym_bac a b c
+  exact abc_col
 
-theorem lin_dep_imp_span (a b c : V) (bc_indep : LinearIndependent K ![b, c])
-(abc_dep : ¬ LinearIndependent K ![a, b, c]) : a ∈ span K {b, c} := by
-rw [not_iff_not.mpr linearIndependent_fin_succ] at abc_dep
-push_neg at abc_dep
-simp only [Fin.isValue, Matrix.cons_val_zero] at abc_dep
-convert abc_dep bc_indep
-ext x
-simp [show Fin.tail ![a, b, c] = ![b, c] from rfl]
-rw [or_comm]
+-- An isomorphism of projective geometries is a bijective map g : G₁ → G₂
+-- satisfying ℓ₁(a, b, c) iff ℓ₂(ga, gb, gc). When G₁ = G₂ one says that
+-- g is a collineation. (p. 27)
+class PG_Iso
+  {G₁ : Type u_1}
+  {G₂ : Type u_2}
+  {PG₁ : ProjectiveGeometry G₁}
+  {PG₂ : ProjectiveGeometry G₂}
+  (f : G₁ → G₂) where
+  bij      : Function.Bijective f
+  pres_col : ∀ (a b c : G₁), PG₁.ell a b c ↔ PG₂.ell (f a) (f b) (f c)
 
--- Version with representatives of the axiom L_2.
-theorem l2_rep (a b p q : V) (apq_dep : ¬ LinearIndependent K ![a, p, q])
-(bpq_dep : ¬ LinearIndependent K ![b, p, q]) (pq_indep : LinearIndependent K ![p, q]) :
-¬ LinearIndependent K ![a, b, p] := by
--- p and q are not the same points.
-have pq_neq : p ≠ q := by sorry
--- a,b,p,q are in the span of p,q.
-have a_span_pq : a ∈ span K {p, q} := by {
-apply lin_dep_imp_span a p q pq_indep apq_dep
-}
-have b_span_pq : b ∈ span K {p, q} := by {
-apply lin_dep_imp_span b p q pq_indep bpq_dep
-}
-have ppq_dep : ¬ LinearIndependent K ![p, p, q] := by apply (lin_dep_aab p q)
-have p_span_pq : p ∈ span K {p, q} := by {
-apply lin_dep_imp_span p p q pq_indep ppq_dep
-}
-have qpq_dep : ¬ LinearIndependent K ![q, p, q] := by apply (lin_dep_aba q p)
-have q_span_pq : q ∈ span K {p, q} := by {
-apply lin_dep_imp_span q p q pq_indep qpq_dep
-}
-intro abp_dep
-have pq_span_dim_ineq (p q : V) (pq_diff : p ≠ q) : Set.finrank (R := K) (toSet {p, q}) ≤ 2 := by {
-have pq_card : (card {p, q}) = 2 := by aesop
-rw [<- pq_card]
-apply finrank_span_finset_le_card {p, q}
-}
-apply pq_span_dim_ineq at pq_neq
-sorry
+-- Let G = (G, ℓ) be a projective geometry. Then the operator ⋆ : G × G →
+-- Powerset(G) defined by a ⋆ b := {c ∈ G / ℓ(a, b, c)} if a ≠ b and a ⋆
+-- a := {a} satisfies P₁, P₂ and P₃.
+def star
+  {PG : ProjectiveGeometry G} :
+    G → G → Set G :=
+  fun a b => if a = b then {a} else {c | PG.ell a b c}
 
+theorem p_1
+  {PG : ProjectiveGeometry G} :
+    ∀ a, star (PG := PG) a a = {a} := by
+  intro a
+  unfold star
+  simp
 
--- Every Projectivization is a ProjectiveGeometry
-instance : ProjectiveGeometry (ℙ K V) :=
-⟨
--- fun X Y Z => ∃ k1 k2 k3 : K, ¬(k1 = 0 ∧ k2 = 0 ∧ k3 = 0) ∧ k1 • X.rep + k2 • Y.rep + k3 • Z.rep = 0,
--- fun X Y Z => ¬ LinearIndependent K ![X.rep, Y.rep, Z.rep],
--- fun X Y Z => Dependent (index X Y Z),
-fun X Y Z => ¬ Independent ![X, Y, Z],
+theorem p_2
+  {PG : ProjectiveGeometry G} :
+    ∀ a b, a ∈ star (PG := PG) b a := by
+  intro a b
+  unfold star
+  obtain rfl | _ := eq_or_ne a b
+  · simp
+  · split
+    case inr.inl eq =>
+      rw [eq]
+      simp
+    case inr.inr _ =>
+      simp
+      apply rel_sym_bca a b a
+      apply PG.l1 a b
 
-by
-intro A B
-rw [independent_iff, rep_comp_3]
-rw [not_linearIndependent_iff]
-use {0, 1, 2}, ![1, 0, -1]
-constructor
-simp
-simp
-done,
-
-by
-intro A B P Q
-intro ABPcol BPQcol PQ_neq
-rw [independent_iff, rep_comp_3] at ABPcol
-rw [independent_iff, rep_comp_3] at BPQcol
-rw [<- independent_pair_iff_neq] at PQ_neq
-rw [independent_iff, rep_comp_2] at PQ_neq
-rw [independent_iff, rep_comp_3]
-apply l2_rep A.rep B.rep P.rep Q.rep
-exact ABPcol
-exact BPQcol
-exact PQ_neq
-done,
-
-sorry
-⟩
+-- theorem p_3
+--   {PG : ProjectiveGeometry G} :
+--     ∀ a b c d p, a ∈ star (PG := PG) b p → p ∈ star (PG := PG) c d → a ≠ c →
+--       star (PG := PG) a c ∩ star (PG := PG) b d ≠ ∅ := by
+--   intro a b c d p
+--   intro a_in_bp p_in_cd ac_neq inter_empty
 
 end Desargues
