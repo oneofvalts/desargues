@@ -15,6 +15,8 @@ class ProjectiveGeometry
   l2  : ∀ a b p q, ell a p q → ell b p q → p ≠ q → ell a b p
   l3  : ∀ a b c d p, ell p a b → ell p c d → ∃ q : G, ell q a c ∧ ell q b d
 
+variable (PG : ProjectiveGeometry G)
+
 -- Any ternary relation ℓ which satisfies L₁ and L₂ is symmetric. From
 -- "ℓ(a, b, c)", ell feeded with any permutations of "abc" can be proved.
 -- First, "acb" and "cab" will be derived. These cycles will generate the
@@ -92,14 +94,15 @@ class PG_Iso
 -- Powerset(G) defined by a ⋆ b := {c ∈ G / ℓ(a, b, c)} if a ≠ b and a ⋆
 -- a := {a} satisfies P₁, P₂ and P₃.
 def star
-  {PG : ProjectiveGeometry G} :
-    G → G → Set G :=
-  fun a b => if a = b then {a} else {c | PG.ell a b c}
+  {PG : ProjectiveGeometry G}
+  (a b : G) :
+    Set G :=
+  {c : G | if a = b then c = a else PG.ell a b c}
 
 theorem p_1
-  {PG : ProjectiveGeometry G} :
-    ∀ a, star (PG := PG) a a = {a} := by
-  intro a
+  {PG : ProjectiveGeometry G}
+  (a : G) :
+    star (PG := PG) a a = {a} := by
   unfold star
   simp
 
@@ -162,11 +165,13 @@ lemma abc_ncol_imp_neq
       apply PG.l1 c a
 
 theorem p_3
-  {PG : ProjectiveGeometry G} :
-    ∀ a b c d p, a ∈ star (PG := PG) b p → p ∈ star (PG := PG) c d → a ≠ c →
-      star (PG := PG) a c ∩ star (PG := PG) b d ≠ ∅ := by
-  intro a b c d p
-  intro a_in_bp p_in_cd ac_neq inter_empty
+  {PG : ProjectiveGeometry G}
+  (a b c d p : G)
+  (a_in_bp : a ∈ star (PG := PG) b p)
+  (p_in_cd : p ∈ star (PG := PG) c d)
+  (ac_neq : a ≠ c) :
+    star (PG := PG) a c ∩ star (PG := PG) b d ≠ ∅ := by
+  intro inter_empty
   by_cases abc_col : PG.ell a b c
   · have b_in_inter :
         b ∈ star (PG := PG) a c ∩ star (PG := PG) b d := by
@@ -258,5 +263,26 @@ theorem p_3
             exact qbd_col
       rw [inter_empty] at q_in_inter
       exact q_in_inter
+
+infix:50 " ⋆ " => star
+
+theorem p_4
+  {PG : ProjectiveGeometry G}
+  (a b c : G)
+  (a_in_bc : a ∈ star (PG := PG) b c)
+  (ab_neq : a ≠ b) :
+    c ∈ star (PG := PG) a b := by
+  have a_in_ca :
+      a ∈ star (PG := PG) c a := by
+    apply p_2 a c
+  -- a c b c a
+  have inter_nempty :=
+      star (PG := PG)
+
+theorem p_5
+  {PG : ProjectiveGeometry G}
+  (a b c : G)
+  (a_in_bc : a ∈ star (PG := PG) b c) :
+    star (PG := PG) a b ⊆ star (PG := PG) b c := by
 
 end Desargues
