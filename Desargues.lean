@@ -276,8 +276,15 @@ theorem p_4
       a ∈ star (PG := PG) c a := by
     apply p_2 a c
   -- a c b c a
-  have inter_nempty :=
-      star (PG := PG)
+  have inter_nempty :
+      star (PG := PG) a b ∩ star (PG := PG) c c ≠ ∅ := by
+    apply p_3 a c b c a
+    · exact a_in_ca
+    · exact a_in_bc
+    · exact ab_neq
+  unfold star at inter_nempty
+  simp at inter_nempty
+  apply inter_nempty
 
 theorem p_5
   {PG : ProjectiveGeometry G}
