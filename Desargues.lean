@@ -15,8 +15,6 @@ class ProjectiveGeometry
   l2  : ∀ a b p q, ell a p q → ell b p q → p ≠ q → ell a b p
   l3  : ∀ a b c d p, ell p a b → ell p c d → ∃ q : G, ell q a c ∧ ell q b d
 
-variable (PG : ProjectiveGeometry G)
-
 -- Any ternary relation ℓ which satisfies L₁ and L₂ is symmetric. From
 -- "ℓ(a, b, c)", ell feeded with any permutations of "abc" can be proved.
 -- First, "acb" and "cab" will be derived. These cycles will generate the
@@ -275,7 +273,6 @@ theorem p_4
   have a_in_ca :
       a ∈ star (PG := PG) c a := by
     apply p_2 a c
-  -- a c b c a
   have inter_nempty :
       star (PG := PG) a b ∩ star (PG := PG) c c ≠ ∅ := by
     apply p_3 a c b c a
@@ -291,5 +288,71 @@ theorem p_5
   (a b c : G)
   (a_in_bc : a ∈ star (PG := PG) b c) :
     star (PG := PG) a b ⊆ star (PG := PG) b c := by
+  -- We may assume that a ≠ b (and hence b ≠ c) by P₁.
+  intro p
+  intro p_in_ab
+  obtain rfl | ab_neq := eq_or_ne a b
+  · rw [p_1 a] at p_in_ab
+    have pa_eq :
+        p = a := by
+      exact p_in_ab
+    rw [pa_eq]
+    exact a_in_bc
+  · obtain rfl | bc_neq := eq_or_ne b c
+    · rw [p_1 b] at a_in_bc
+      simp at a_in_bc
+      contradiction
+    · -- In particular, one has c ∈ a ⋆ b by P₄.
+      have c_in_ab :
+          c ∈ star (PG := PG) a b := by
+        apply p_4 a b c
+        · exact a_in_bc
+        · exact ab_neq
+      -- We may assume that p ≠ a and p ≠ c.
+      obtain rfl | pa_neq := eq_or_ne p a
+      · unfold star at c_in_ab
+        simp at c_in_ab
+        split at c_in_ab
+        · contradiction
+        · unfold star
+          simp
+          split
+          · contradiction
+          · apply rel_sym_bca p b c
+            exact c_in_ab
+      · obtain rfl | pc_neq := eq_or_ne p c
+        · unfold star
+          simp
+          split
+          · rename_i bp_eq
+            exact id bp_eq.symm
+          · apply rel_sym_bca p b p
+            apply PG.l1 p b
+        · have b_in_pa :
+              b ∈ star (PG := PG) p a := by
+            apply p_4 p a b
+            · exact p_in_ab
+            · exact pa_neq
+          have inter_nempty :
+              star (PG := PG) c p ∩ star (PG := PG) a a ≠ ∅ := by
+            apply p_3 c a p a b
+            · exact c_in_ab
+            · exact b_in_pa
+            · exact id (Ne.symm pc_neq)
+          have a_in_cp :
+              a ∈ star (PG := PG) c p := by
+            unfold star at inter_nempty
+            simp at inter_nempty
+            apply inter_nempty
+          -- b p c p a
+          have inter_nempty :
+              star (PG := PG) b c ∩ star (PG := PG) p p ≠ ∅ := by
+            apply p_3 b p c p a
+            · exact b_in_pa
+            · exact a_in_cp
+            · exact bc_neq
+          unfold star at inter_nempty
+          simp at inter_nempty
+          apply inter_nempty
 
 end Desargues
