@@ -389,5 +389,39 @@ theorem p_7
   · rw [p_6 c b, p_6 b a] at c_in_ba
     exact c_in_ba
 
+theorem p_8
+  {PG : ProjectiveGeometry G}
+  (a b c d : G)
+  (a_in_cd : a ∈ star (PG := PG) c d)
+  (b_in_cd : b ∈ star (PG := PG) c d)
+  (ab_neq : a ≠ b) :
+    star (PG := PG) a b = star (PG := PG) c d := by
+    obtain rfl | bc_neq := eq_or_ne b c
+    · rw [p_7 a b d]
+      · exact a_in_cd
+      · exact ab_neq
+    · rw [<- p_7 b c d]
+      case inr.a_in_bc =>
+        exact b_in_cd
+      case ab_neq =>
+        exact bc_neq
+      rw [<- p_7 b c d] at a_in_cd
+      case inr.a_in_bc =>
+        exact b_in_cd
+      case inr.ab_neq =>
+        exact bc_neq
+      rw [<- p_7 a b c]
+      case inr.a_in_bc =>
+        exact a_in_cd
+      case inr.ab_neq =>
+        exact ab_neq
+
+theorem p_9
+  {PG : ProjectiveGeometry G}
+  (a b c d p : G)
+  (a_in_bp : a ∈ star (PG := PG) b p)
+  (p_in_cd : p ∈ star (PG := PG) c d) :
+    exists q : G, q ∈ star (PG := PG) b d → a ∈ star (PG := PG) c q := by
+  sorry
 
 end Desargues
