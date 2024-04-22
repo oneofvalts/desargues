@@ -344,7 +344,6 @@ theorem p_5
             unfold star at inter_nempty
             simp at inter_nempty
             apply inter_nempty
-          -- b p c p a
           have inter_nempty :
               star (PG := PG) b c ∩ star (PG := PG) p p ≠ ∅ := by
             apply p_3 b p c p a
@@ -354,5 +353,41 @@ theorem p_5
           unfold star at inter_nempty
           simp at inter_nempty
           apply inter_nempty
+
+theorem p_6
+  {PG : ProjectiveGeometry G}
+  (a b : G) :
+    star (PG := PG) a b = star (PG := PG) b a := by
+  have a_in_ba :
+      a ∈ star (PG := PG) b a := by
+    apply p_2 a b
+  have b_in_ab :
+      b ∈ star (PG := PG) a b := by
+    apply p_2 b a
+  apply eq_of_subset_of_subset
+  · apply p_5 a b a
+    exact a_in_ba
+  · apply p_5 b a b
+    exact b_in_ab
+
+theorem p_7
+  {PG : ProjectiveGeometry G}
+  (a b c : G)
+  (a_in_bc : a ∈ star (PG := PG) b c)
+  (ab_neq : a ≠ b) :
+    star (PG := PG) a b = star (PG := PG) b c := by
+  have c_in_ba :
+      c ∈ star (PG := PG) b a := by
+    rw [<- p_6 a b]
+    apply p_4 a b c
+    · exact a_in_bc
+    · exact ab_neq
+  apply p_5 c b a at c_in_ba
+  apply eq_of_subset_of_subset
+  · apply p_5 a b c
+    exact a_in_bc
+  · rw [p_6 c b, p_6 b a] at c_in_ba
+    exact c_in_ba
+
 
 end Desargues
