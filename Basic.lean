@@ -97,6 +97,8 @@ def star
     Set G :=
   {c : G | if a = b then c = a else PG.ell a b c}
 
+infix:50 " ⋆ " => star
+
 theorem p_1
   {PG : ProjectiveGeometry G}
   (a : G) :
@@ -262,7 +264,6 @@ theorem p_3
       rw [inter_empty] at q_in_inter
       exact q_in_inter
 
-infix:50 " ⋆ " => star
 
 theorem p_4
   {PG : ProjectiveGeometry G}
@@ -289,14 +290,11 @@ theorem p_5
   (a_in_bc : a ∈ star (PG := PG) b c) :
     star (PG := PG) a b ⊆ star (PG := PG) b c := by
   -- We may assume that a ≠ b (and hence b ≠ c) by P₁.
-  intro p
-  intro p_in_ab
+  intro p p_in_ab
   obtain rfl | ab_neq := eq_or_ne a b
   · rw [p_1 a] at p_in_ab
-    have pa_eq :
-        p = a := by
-      exact p_in_ab
-    rw [pa_eq]
+    simp at p_in_ab
+    rw [p_in_ab]
     exact a_in_bc
   · obtain rfl | bc_neq := eq_or_ne b c
     · rw [p_1 b] at a_in_bc
@@ -305,9 +303,7 @@ theorem p_5
     · -- In particular, one has c ∈ a ⋆ b by P₄.
       have c_in_ab :
           c ∈ star (PG := PG) a b := by
-        apply p_4 a b c
-        · exact a_in_bc
-        · exact ab_neq
+        apply p_4 a b c a_in_bc ab_neq
       -- We may assume that p ≠ a and p ≠ c.
       obtain rfl | pa_neq := eq_or_ne p a
       · unfold star at c_in_ab
@@ -330,15 +326,10 @@ theorem p_5
             apply PG.l1 p b
         · have b_in_pa :
               b ∈ star (PG := PG) p a := by
-            apply p_4 p a b
-            · exact p_in_ab
-            · exact pa_neq
+            apply p_4 p a b p_in_ab pa_neq
           have inter_nempty :
               star (PG := PG) c p ∩ star (PG := PG) a a ≠ ∅ := by
-            apply p_3 c a p a b
-            · exact c_in_ab
-            · exact b_in_pa
-            · exact id (Ne.symm pc_neq)
+            apply p_3 c a p a b c_in_ab b_in_pa (id (Ne.symm pc_neq))
           have a_in_cp :
               a ∈ star (PG := PG) c p := by
             unfold star at inter_nempty
@@ -346,10 +337,7 @@ theorem p_5
             apply inter_nempty
           have inter_nempty :
               star (PG := PG) b c ∩ star (PG := PG) p p ≠ ∅ := by
-            apply p_3 b p c p a
-            · exact b_in_pa
-            · exact a_in_cp
-            · exact bc_neq
+            apply p_3 b p c p a b_in_pa a_in_cp bc_neq
           unfold star at inter_nempty
           simp at inter_nempty
           apply inter_nempty
@@ -365,10 +353,8 @@ theorem p_6
       b ∈ star (PG := PG) a b := by
     apply p_2 b a
   apply eq_of_subset_of_subset
-  · apply p_5 a b a
-    exact a_in_ba
-  · apply p_5 b a b
-    exact b_in_ab
+  · apply p_5 a b a a_in_ba
+  · apply p_5 b a b b_in_ab
 
 theorem p_7
   {PG : ProjectiveGeometry G}
@@ -379,13 +365,10 @@ theorem p_7
   have c_in_ba :
       c ∈ star (PG := PG) b a := by
     rw [<- p_6 a b]
-    apply p_4 a b c
-    · exact a_in_bc
-    · exact ab_neq
+    apply p_4 a b c a_in_bc ab_neq
   apply p_5 c b a at c_in_ba
   apply eq_of_subset_of_subset
-  · apply p_5 a b c
-    exact a_in_bc
+  · apply p_5 a b c a_in_bc
   · rw [p_6 c b, p_6 b a] at c_in_ba
     exact c_in_ba
 
@@ -397,31 +380,89 @@ theorem p_8
   (ab_neq : a ≠ b) :
     star (PG := PG) a b = star (PG := PG) c d := by
     obtain rfl | bc_neq := eq_or_ne b c
-    · rw [p_7 a b d]
-      · exact a_in_cd
-      · exact ab_neq
-    · rw [<- p_7 b c d]
-      case inr.a_in_bc =>
-        exact b_in_cd
-      case ab_neq =>
-        exact bc_neq
-      rw [<- p_7 b c d] at a_in_cd
-      case inr.a_in_bc =>
-        exact b_in_cd
-      case inr.ab_neq =>
-        exact bc_neq
-      rw [<- p_7 a b c]
-      case inr.a_in_bc =>
-        exact a_in_cd
-      case inr.ab_neq =>
-        exact ab_neq
+    · rw [p_7 a b d a_in_cd ab_neq]
+    · rw [<- p_7 b c d b_in_cd bc_neq]
+      rw [<- p_7 b c d b_in_cd bc_neq] at a_in_cd
+      rw [<- p_7 a b c a_in_cd ab_neq]
 
 theorem p_9
   {PG : ProjectiveGeometry G}
   (a b c d p : G)
   (a_in_bp : a ∈ star (PG := PG) b p)
   (p_in_cd : p ∈ star (PG := PG) c d) :
-    exists q : G, q ∈ star (PG := PG) b d → a ∈ star (PG := PG) c q := by
-  sorry
+    exists q : G, q ∈ star (PG := PG) b d ∧ a ∈ star (PG := PG) c q := by
+  by_cases c_in_bd : c ∈ star (PG := PG) b d
+  · have cd_subseteq_bd :
+        star (PG := PG) c d ⊆ star (PG := PG) b d := by
+      rw [p_6 b d]
+      rw [p_6 b d] at c_in_bd
+      apply p_5 c d b c_in_bd
+    apply cd_subseteq_bd at p_in_cd
+    have pb_subseteq_bd :
+        star (PG := PG) p b ⊆ star (PG := PG) b d := by
+      apply p_5 p b d p_in_cd
+    rw [p_6 b p] at a_in_bp
+    apply pb_subseteq_bd at a_in_bp
+    -- Thus one can choose q = a.
+    use a
+    constructor
+    · exact a_in_bp
+    · unfold star
+      simp
+      split
+      case h.right.inl ca_eq =>
+        exact id ca_eq.symm
+      case h.right.inr ca_neq =>
+        apply rel_sym_bca a c a
+        apply PG.l1 a c
+  · obtain rfl | ab_eq := eq_or_ne a c
+    · -- And if a = c, then one can choose q = b.
+      use b
+      constructor
+      · unfold star
+        simp
+        right
+        apply PG.l1 b d
+      · unfold star
+        simp
+        right
+        apply PG.l1 a b
+    · -- So we may assume that c ∉ b ⋆ d and a ≠ c.
+      have q_ex :
+          exists q, q ∈ star (PG := PG) a c ∩ star (PG := PG) b d := by
+        let inter := star (PG := PG) a c ∩ star (PG := PG) b d
+        rw [<- nonempty_def]
+        have disj :
+            inter = ∅ ∨ Set.Nonempty inter :=
+          by apply eq_empty_or_nonempty inter
+        have inter_nempty :
+            inter ≠ ∅ := by
+          apply p_3 a b c d p a_in_bp p_in_cd ab_eq
+        rcases disj
+        case inl _ => contradiction
+        case inr nempty => exact nempty
+      match q_ex with
+      | ⟨q, q_in_ac, q_in_bd⟩ =>
+        use q
+        constructor
+        · exact q_in_bd
+        · obtain rfl | qa_neq := eq_or_ne q a
+          · unfold star
+            simp
+            split
+            case h.right.inl.inl cq_eq =>
+              exact id cq_eq.symm
+            case h.right.inl.inr _ =>
+              apply rel_sym_bca q c q
+              apply PG.l1 q c
+          · have c_in_qa :
+                c ∈ star (PG := PG) q a := by
+              apply p_4 q a c q_in_ac qa_neq
+            have cq_neq :
+                c ≠ q := by
+              intro cq_eq
+              rw [cq_eq] at c_in_bd
+              exact c_in_bd q_in_bd
+            apply p_4 c q a c_in_qa cq_neq
 
 end Desargues

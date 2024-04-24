@@ -15,5 +15,5 @@ require mathlib from git
 lean_lib «PV» where
 
 @[default_target]
-lean_lib «Desargues» where
+lean_lib «Basic» where
   -- add any library configuration options here
