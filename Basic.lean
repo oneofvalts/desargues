@@ -13,27 +13,26 @@ class ProjectiveGeometry
   ell : G → G → G → Prop
   l1  : ∀ a b, ell a b a
   l2  : ∀ a b p q, ell a p q → ell b p q → p ≠ q → ell a b p
-  l3  : ∀ a b c d p, ell p a b → ell p c d → ∃ q : G, ell q a c ∧ ell q b d
+  l3  : ∀ a b c d p, ell p a b → ell p c d → ∃ q, ell q a c ∧ ell q b d
 
 -- Any ternary relation ℓ which satisfies L₁ and L₂ is symmetric. From
 -- "ℓ(a, b, c)", ell feeded with any permutations of "abc" can be proved.
 -- First, "acb" and "cab" will be derived. These cycles will generate the
 -- group of permutations of three objects. (p. 27)
 theorem rel_sym_acb
-  {G : Type u}
   {PG : ProjectiveGeometry G}
   (a b c : G)
   (abc_col : PG.ell a b c) :
     PG.ell a c b := by
   obtain rfl | bc_neq := eq_or_ne b c
-  · exact abc_col -- b = c, meaning abc and acb becomes abb
+  · -- b = c, meaning abc and acb becomes abb
+    exact abc_col
   · apply PG.l2 a c b c
     · exact abc_col
     · apply PG.l1 c b
     · exact bc_neq
 
 theorem rel_sym_cab
-  {G : Type u}
   {PG : ProjectiveGeometry G}
   (a b c : G)
   (abc_col : PG.ell a b c) :
@@ -47,7 +46,6 @@ theorem rel_sym_cab
 
 -- Now we can easily generate the other three.
 theorem rel_sym_bca
-  {G : Type u}
   {PG : ProjectiveGeometry G}
   (a b c : G)
   (abc_col : PG.ell a b c) :
@@ -57,7 +55,6 @@ theorem rel_sym_bca
   exact abc_col
 
 theorem rel_sym_bac
-  {G : Type u}
   {PG : ProjectiveGeometry G}
   (a b c : G)
   (abc_col : PG.ell a b c) :
@@ -67,7 +64,6 @@ theorem rel_sym_bac
   exact abc_col
 
 theorem rel_sym_cba
-  {G : Type u}
   {PG : ProjectiveGeometry G}
   (a b c : G)
   (abc_col : PG.ell a b c) :
@@ -80,8 +76,6 @@ theorem rel_sym_cba
 -- satisfying ℓ₁(a, b, c) iff ℓ₂(ga, gb, gc). When G₁ = G₂ one says that
 -- g is a collineation. (p. 27)
 class PG_Iso
-  {G₁ : Type u_1}
-  {G₂ : Type u_2}
   {PG₁ : ProjectiveGeometry G₁}
   {PG₂ : ProjectiveGeometry G₂}
   (f : G₁ → G₂) where
@@ -92,7 +86,7 @@ class PG_Iso
 -- Powerset(G) defined by a ⋆ b := {c ∈ G / ℓ(a, b, c)} if a ≠ b and a ⋆
 -- a := {a} satisfies P₁, P₂ and P₃.
 def star
-  {PG : ProjectiveGeometry G}
+  (PG : ProjectiveGeometry G)
   (a b : G) :
     Set G :=
   {c : G | if a = b then c = a else PG.ell a b c}
@@ -102,13 +96,13 @@ infix:50 " ⋆ " => star
 theorem p_1
   {PG : ProjectiveGeometry G}
   (a : G) :
-    star (PG := PG) a a = {a} := by
+    star PG a a = {a} := by
   unfold star
   simp
 
 theorem p_2
   {PG : ProjectiveGeometry G} :
-    ∀ a b, a ∈ star (PG := PG) b a := by
+    ∀ a b, a ∈ star PG b a := by
   intro a b
   unfold star
   obtain rfl | _ := eq_or_ne a b
@@ -125,7 +119,7 @@ theorem p_2
 lemma star_imp_ell
   {PG : ProjectiveGeometry G}
   (x y z : G)
-  (x_in_yz : x ∈ star (PG := PG) y z) :
+  (x_in_yz : x ∈ star PG y z) :
     PG.ell x y z := by
   obtain rfl | yz_neq := eq_or_ne y z
   · apply rel_sym_bca y x y
@@ -167,14 +161,14 @@ lemma abc_ncol_imp_neq
 theorem p_3
   {PG : ProjectiveGeometry G}
   (a b c d p : G)
-  (a_in_bp : a ∈ star (PG := PG) b p)
-  (p_in_cd : p ∈ star (PG := PG) c d)
+  (a_in_bp : a ∈ star PG b p)
+  (p_in_cd : p ∈ star PG c d)
   (ac_neq : a ≠ c) :
-    star (PG := PG) a c ∩ star (PG := PG) b d ≠ ∅ := by
+    star PG a c ∩ star PG b d ≠ ∅ := by
   intro inter_empty
   by_cases abc_col : PG.ell a b c
   · have b_in_inter :
-        b ∈ star (PG := PG) a c ∩ star (PG := PG) b d := by
+        b ∈ star PG a c ∩ star PG b d := by
       rw [inter_def]
       simp
       constructor
@@ -225,7 +219,8 @@ theorem p_3
         b ≠ d := by
       intro bd_eq
       rw [<- bd_eq] at pcd_col
-      apply abc_col -- ℓ(a, c, b) follows from L₂, now.
+      apply abc_col
+      -- ℓ(a, c, b) follows from L₂, now.
       apply rel_sym_acb a c b
       apply PG.l2 a c b p
       · exact abp_col
@@ -233,7 +228,7 @@ theorem p_3
         exact pcd_col
       · exact bp_neq
     have q_ex :
-        exists q, PG.ell q a c ∧ PG.ell q b d := by
+        ∃ q, PG.ell q a c ∧ PG.ell q b d := by
       apply PG.l3 a b c d p
       · apply rel_sym_cab a b p
         exact abp_col
@@ -241,7 +236,7 @@ theorem p_3
     match q_ex with
     | ⟨q, qac_col, qbd_col⟩ =>
       have q_in_inter :
-          q ∈ star (PG := PG) a c ∩ star (PG := PG) b d := by
+          q ∈ star PG a c ∩ star PG b d := by
         rw [inter_def]
         simp
         constructor
@@ -268,14 +263,14 @@ theorem p_3
 theorem p_4
   {PG : ProjectiveGeometry G}
   (a b c : G)
-  (a_in_bc : a ∈ star (PG := PG) b c)
+  (a_in_bc : a ∈ star PG b c)
   (ab_neq : a ≠ b) :
-    c ∈ star (PG := PG) a b := by
+    c ∈ star PG a b := by
   have a_in_ca :
-      a ∈ star (PG := PG) c a := by
+      a ∈ star PG c a := by
     apply p_2 a c
   have inter_nempty :
-      star (PG := PG) a b ∩ star (PG := PG) c c ≠ ∅ := by
+      star PG a b ∩ star PG c c ≠ ∅ := by
     apply p_3 a c b c a
     · exact a_in_ca
     · exact a_in_bc
@@ -287,8 +282,8 @@ theorem p_4
 theorem p_5
   {PG : ProjectiveGeometry G}
   (a b c : G)
-  (a_in_bc : a ∈ star (PG := PG) b c) :
-    star (PG := PG) a b ⊆ star (PG := PG) b c := by
+  (a_in_bc : a ∈ star PG b c) :
+    star PG a b ⊆ star PG b c := by
   -- We may assume that a ≠ b (and hence b ≠ c) by P₁.
   intro p p_in_ab
   obtain rfl | ab_neq := eq_or_ne a b
@@ -302,7 +297,7 @@ theorem p_5
       contradiction
     · -- In particular, one has c ∈ a ⋆ b by P₄.
       have c_in_ab :
-          c ∈ star (PG := PG) a b := by
+          c ∈ star PG a b := by
         apply p_4 a b c a_in_bc ab_neq
       -- We may assume that p ≠ a and p ≠ c.
       obtain rfl | pa_neq := eq_or_ne p a
@@ -325,18 +320,18 @@ theorem p_5
           · apply rel_sym_bca p b p
             apply PG.l1 p b
         · have b_in_pa :
-              b ∈ star (PG := PG) p a := by
+              b ∈ star PG p a := by
             apply p_4 p a b p_in_ab pa_neq
           have inter_nempty :
-              star (PG := PG) c p ∩ star (PG := PG) a a ≠ ∅ := by
+              star PG c p ∩ star PG a a ≠ ∅ := by
             apply p_3 c a p a b c_in_ab b_in_pa (id (Ne.symm pc_neq))
           have a_in_cp :
-              a ∈ star (PG := PG) c p := by
+              a ∈ star PG c p := by
             unfold star at inter_nempty
             simp at inter_nempty
             apply inter_nempty
           have inter_nempty :
-              star (PG := PG) b c ∩ star (PG := PG) p p ≠ ∅ := by
+              star PG b c ∩ star PG p p ≠ ∅ := by
             apply p_3 b p c p a b_in_pa a_in_cp bc_neq
           unfold star at inter_nempty
           simp at inter_nempty
@@ -345,12 +340,12 @@ theorem p_5
 theorem p_6
   {PG : ProjectiveGeometry G}
   (a b : G) :
-    star (PG := PG) a b = star (PG := PG) b a := by
+    star PG a b = star PG b a := by
   have a_in_ba :
-      a ∈ star (PG := PG) b a := by
+      a ∈ star PG b a := by
     apply p_2 a b
   have b_in_ab :
-      b ∈ star (PG := PG) a b := by
+      b ∈ star PG a b := by
     apply p_2 b a
   apply eq_of_subset_of_subset
   · apply p_5 a b a a_in_ba
@@ -359,11 +354,11 @@ theorem p_6
 theorem p_7
   {PG : ProjectiveGeometry G}
   (a b c : G)
-  (a_in_bc : a ∈ star (PG := PG) b c)
+  (a_in_bc : a ∈ star PG b c)
   (ab_neq : a ≠ b) :
-    star (PG := PG) a b = star (PG := PG) b c := by
+    star PG a b = star PG b c := by
   have c_in_ba :
-      c ∈ star (PG := PG) b a := by
+      c ∈ star PG b a := by
     rw [<- p_6 a b]
     apply p_4 a b c a_in_bc ab_neq
   apply p_5 c b a at c_in_ba
@@ -375,10 +370,10 @@ theorem p_7
 theorem p_8
   {PG : ProjectiveGeometry G}
   (a b c d : G)
-  (a_in_cd : a ∈ star (PG := PG) c d)
-  (b_in_cd : b ∈ star (PG := PG) c d)
+  (a_in_cd : a ∈ star PG c d)
+  (b_in_cd : b ∈ star PG c d)
   (ab_neq : a ≠ b) :
-    star (PG := PG) a b = star (PG := PG) c d := by
+    star PG a b = star PG c d := by
     obtain rfl | bc_neq := eq_or_ne b c
     · rw [p_7 a b d a_in_cd ab_neq]
     · rw [<- p_7 b c d b_in_cd bc_neq]
@@ -388,18 +383,18 @@ theorem p_8
 theorem p_9
   {PG : ProjectiveGeometry G}
   (a b c d p : G)
-  (a_in_bp : a ∈ star (PG := PG) b p)
-  (p_in_cd : p ∈ star (PG := PG) c d) :
-    exists q : G, q ∈ star (PG := PG) b d ∧ a ∈ star (PG := PG) c q := by
-  by_cases c_in_bd : c ∈ star (PG := PG) b d
+  (a_in_bp : a ∈ star PG b p)
+  (p_in_cd : p ∈ star PG c d) :
+    ∃ q : G, q ∈ star PG b d ∧ a ∈ star PG c q := by
+  by_cases c_in_bd : c ∈ star PG b d
   · have cd_subseteq_bd :
-        star (PG := PG) c d ⊆ star (PG := PG) b d := by
+        star PG c d ⊆ star PG b d := by
       rw [p_6 b d]
       rw [p_6 b d] at c_in_bd
       apply p_5 c d b c_in_bd
     apply cd_subseteq_bd at p_in_cd
     have pb_subseteq_bd :
-        star (PG := PG) p b ⊆ star (PG := PG) b d := by
+        star PG p b ⊆ star PG b d := by
       apply p_5 p b d p_in_cd
     rw [p_6 b p] at a_in_bp
     apply pb_subseteq_bd at a_in_bp
@@ -429,8 +424,8 @@ theorem p_9
         apply PG.l1 a b
     · -- So we may assume that c ∉ b ⋆ d and a ≠ c.
       have q_ex :
-          exists q, q ∈ star (PG := PG) a c ∩ star (PG := PG) b d := by
-        let inter := star (PG := PG) a c ∩ star (PG := PG) b d
+          ∃ q, q ∈ star PG a c ∩ star PG b d := by
+        let inter := star PG a c ∩ star PG b d
         rw [<- nonempty_def]
         have disj :
             inter = ∅ ∨ Set.Nonempty inter :=
@@ -456,7 +451,7 @@ theorem p_9
               apply rel_sym_bca q c q
               apply PG.l1 q c
           · have c_in_qa :
-                c ∈ star (PG := PG) q a := by
+                c ∈ star PG q a := by
               apply p_4 q a c q_in_ac qa_neq
             have cq_neq :
                 c ≠ q := by
