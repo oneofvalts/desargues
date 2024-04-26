@@ -91,8 +91,6 @@ def star
     Set G :=
   {c : G | if a = b then c = a else PG.ell a b c}
 
-infix:50 " ⋆ " => star
-
 theorem p_1
   {PG : ProjectiveGeometry G}
   (a : G) :
