@@ -57,21 +57,18 @@ instance
     { apply PG.l3 a b c d p pab_col pcd_col }
   match q_ex with
   | ⟨q, qac_col, qbd_col⟩ =>
-    have q_in_E :
+    have q_in_ac :
         q ∈ star (ell := ell) a c := by
       unfold Basic.star
       simp
       split
-      case inl ac_eq =>
-        rw [<- ac_eq] at qac_col
-        sorry
-      case inr ac_neq =>
-        apply rel_sym_bca q a c qac_col
+      · sorry
+      · sorry
     have ac_subseteq_E :
         star (ell := ell) a c ⊆ S.E := by
       apply S.closure a c a.property c.property
-    apply ac_subseteq_E at q_in_E
-    use ⟨q, q_in_E⟩
+    apply ac_subseteq_E at q_in_ac
+    use ⟨q, q_in_ac⟩
   done
   ⟩
   ⟩
