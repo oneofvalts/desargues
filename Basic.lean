@@ -91,6 +91,7 @@ def star
     Set G :=
   {c : G | if a = b then c = a else ell a b c}
 
+@[simp]
 theorem p_1
   [ProjectiveGeometry G ell]
   (a : G) :
@@ -264,15 +265,9 @@ theorem p_4
   (a_in_bc : a ∈ star (ell := ell) b c)
   (ab_neq : a ≠ b) :
     c ∈ star (ell := ell) a b := by
-  have a_in_ca :
-      a ∈ star (ell := ell) c a := by
-    apply p_2 a c
   have inter_nempty :
       star (ell := ell) a b ∩ star (ell := ell) c c ≠ ∅ := by
-    apply p_3 a c b c a
-    · exact a_in_ca
-    · exact a_in_bc
-    · exact ab_neq
+    apply p_3 a c b c a (p_2 a c) a_in_bc ab_neq
   unfold star at inter_nempty
   simp at inter_nempty
   apply inter_nempty
@@ -285,13 +280,11 @@ theorem p_5
   -- We may assume that a ≠ b (and hence b ≠ c) by P₁.
   intro p p_in_ab
   obtain rfl | ab_neq := eq_or_ne a b
-  · rw [p_1 a] at p_in_ab
-    simp at p_in_ab
+  · simp at p_in_ab
     rw [p_in_ab]
     exact a_in_bc
   · obtain rfl | bc_neq := eq_or_ne b c
-    · rw [p_1 b] at a_in_bc
-      simp at a_in_bc
+    · simp at a_in_bc
       contradiction
     · -- In particular, one has c ∈ a ⋆ b by P₄.
       have c_in_ab :
@@ -339,15 +332,9 @@ theorem p_6
   [ProjectiveGeometry G ell]
   (a b : G) :
     star (ell := ell) a b = star (ell := ell) b a := by
-  have a_in_ba :
-      a ∈ star (ell := ell) b a := by
-    apply p_2 a b
-  have b_in_ab :
-      b ∈ star (ell := ell) a b := by
-    apply p_2 b a
   apply eq_of_subset_of_subset
-  · apply p_5 a b a a_in_ba
-  · apply p_5 b a b b_in_ab
+  · apply p_5 a b a (p_2 a b)
+  · apply p_5 b a b (p_2 b a)
 
 theorem p_7
   [ProjectiveGeometry G ell]
