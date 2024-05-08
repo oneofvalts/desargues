@@ -87,12 +87,12 @@ theorem l1_l2_eq_imp_l3
   (a b c d p : G)
   (l1 : ∀ a b , ell a b a)
   (l2 : ∀ a b p q , ell a p q → ell b p q → p ≠ q → ell a b p)
-  (abcdp_neq : a = b ∨ a = c ∨ a = d ∨ a = p ∨ b = c ∨ b = d ∨ b = p
+  (abcdp_deq : a = b ∨ a = c ∨ a = d ∨ a = p ∨ b = c ∨ b = d ∨ b = p
                ∨ c = d ∨ c = p ∨ d = p)
   (pab_col : ell p a b)
   (pcd_col : ell p c d) :
     ∃ q, ell q a c ∧ ell q b d := by
-  rcases abcdp_neq
+  rcases abcdp_deq
   case inl ab_eq =>
     rw [ab_eq]
     use b
