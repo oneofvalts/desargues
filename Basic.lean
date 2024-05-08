@@ -20,57 +20,175 @@ class ProjectiveGeometry
 -- First, "acb" and "cab" will be derived. These cycles will generate the
 -- group of permutations of three objects. (p. 27)
 theorem rel_sym_acb
-  [PG : ProjectiveGeometry G ell]
+  {ell : G → G → G → Prop}
   (a b c : G)
+  (l1 : ∀ a b , ell a b a)
+  (l2 : ∀ a b p q , ell a p q → ell b p q → p ≠ q → ell a b p)
   (abc_col : ell a b c) :
     ell a c b := by
   obtain rfl | bc_neq := eq_or_ne b c
   · -- b = c, meaning abc and acb becomes abb
     exact abc_col
-  · apply PG.l2 a c b c
+  · apply l2 a c b c
     · exact abc_col
-    · apply PG.l1 c b
+    · apply l1 c b
     · exact bc_neq
 
 theorem rel_sym_cab
-  [PG : ProjectiveGeometry G ell]
+  {ell : G → G → G → Prop}
   (a b c : G)
+  (l1 : ∀ a b , ell a b a)
+  (l2 : ∀ a b p q , ell a p q → ell b p q → p ≠ q → ell a b p)
   (abc_col : ell a b c) :
     ell c a b := by
   obtain rfl | bc_neq := eq_or_ne b c
-  · apply PG.l1 b a
-  · apply PG.l2 c a b c
-    · apply PG.l1 c b
+  · apply l1 b a
+  · apply l2 c a b c
+    · apply l1 c b
     · exact abc_col
     · exact bc_neq
 
 -- Now we can easily generate the other three.
 theorem rel_sym_bca
-  [ProjectiveGeometry G ell]
+  {ell : G → G → G → Prop}
   (a b c : G)
+  (l1 : ∀ a b , ell a b a)
+  (l2 : ∀ a b p q , ell a p q → ell b p q → p ≠ q → ell a b p)
   (abc_col : ell a b c) :
     ell b c a := by
-  apply rel_sym_cab c a b
-  apply rel_sym_cab a b c
+  apply rel_sym_cab c a b l1 l2
+  apply rel_sym_cab a b c l1 l2
   exact abc_col
 
 theorem rel_sym_bac
-  [ProjectiveGeometry G ell]
+  {ell : G → G → G → Prop}
   (a b c : G)
+  (l1 : ∀ a b , ell a b a)
+  (l2 : ∀ a b p q , ell a p q → ell b p q → p ≠ q → ell a b p)
   (abc_col : ell a b c) :
     ell b a c := by
-  apply rel_sym_cab a c b
-  apply rel_sym_acb a b c
+  apply rel_sym_cab a c b l1 l2
+  apply rel_sym_acb a b c l1 l2
   exact abc_col
 
 theorem rel_sym_cba
-  [ProjectiveGeometry G ell]
+  {ell : G → G → G → Prop}
   (a b c : G)
+  (l1 : ∀ a b , ell a b a)
+  (l2 : ∀ a b p q , ell a p q → ell b p q → p ≠ q → ell a b p)
   (abc_col : ell a b c) :
     ell c b a := by
-  apply rel_sym_cab b a c
-  apply rel_sym_bac a b c
+  apply rel_sym_cab b a c l1 l2
+  apply rel_sym_bac a b c l1 l2
   exact abc_col
+
+theorem l1_l2_eq_imp_l3
+  (ell : G → G → G → Prop)
+  (a b c d p : G)
+  (l1 : ∀ a b , ell a b a)
+  (l2 : ∀ a b p q , ell a p q → ell b p q → p ≠ q → ell a b p)
+  (abcdp_neq : a = b ∨ a = c ∨ a = d ∨ a = p ∨ b = c ∨ b = d ∨ b = p
+               ∨ c = d ∨ c = p ∨ d = p)
+  (pab_col : ell p a b)
+  (pcd_col : ell p c d) :
+    ∃ q, ell q a c ∧ ell q b d := by
+  rcases abcdp_neq
+  case inl ab_eq =>
+    rw [ab_eq]
+    use b
+    constructor
+    case h.left =>
+      apply rel_sym_cab b c b l1 l2 (l1 b c)
+    case h.right =>
+      apply rel_sym_cab b d b l1 l2 (l1 b d)
+  case inr rest =>
+    rcases rest
+    case inl ac_eq =>
+      rw [ac_eq]
+      use b
+      constructor
+      case h.left =>
+        apply rel_sym_bca c b c l1 l2 (l1 c b)
+      case h.right =>
+        apply rel_sym_cab b d b l1 l2 (l1 b d)
+    case inr rest =>
+      rcases rest
+      case inl ad_eq =>
+        rw [ad_eq]
+        use d
+        constructor
+        case h.left =>
+          apply rel_sym_cab d c d l1 l2 (l1 d c)
+        case h.right =>
+          apply l1 d b
+      case inr rest =>
+        rcases rest
+        case inl ap_eq =>
+          rw [ap_eq]
+          use d
+          constructor
+          case h.left =>
+            apply rel_sym_cab p c d l1 l2 pcd_col
+          case h.right =>
+            apply l1 d b
+        case inr rest =>
+          rcases rest
+          case inl bc_eq =>
+            rw [bc_eq]
+            use c
+            constructor
+            case h.left =>
+              apply l1 c a
+            case h.right =>
+              apply rel_sym_cab c d c l1 l2 (l1 c d)
+          case inr rest =>
+          rcases rest
+          case inl bd_eq =>
+            rw [bd_eq]
+            use c
+            constructor
+            case h.left =>
+              apply l1 c a
+            case h.right =>
+              apply rel_sym_bca d c d l1 l2 (l1 d c)
+          case inr rest =>
+            rcases rest
+            case inl bp_eq =>
+              rw [bp_eq]
+              use c
+              constructor
+              case h.left =>
+                apply l1 c a
+              case h.right =>
+                apply rel_sym_bac p c d l1 l2 pcd_col
+            case inr rest =>
+              rcases rest
+              case inl cd_eq =>
+                rw [cd_eq]
+                use d
+                constructor
+                case h.left =>
+                  apply l1 d a
+                case h.right =>
+                  apply l1 d b
+              case inr rest =>
+                rcases rest
+                case inl cp_eq =>
+                  rw [cp_eq]
+                  use b
+                  constructor
+                  case h.left =>
+                    apply rel_sym_cba p a b l1 l2 pab_col
+                  case h.right =>
+                    apply rel_sym_cab b d b l1 l2 (l1 b d)
+                case inr dp_eq =>
+                  rw [dp_eq]
+                  use a
+                  constructor
+                  case h.left =>
+                    apply rel_sym_cab a c a l1 l2 (l1 a c)
+                  case h.right =>
+                    apply rel_sym_bca p a b l1 l2 pab_col
 
 -- An isomorphism of projective geometries is a bijective map g : G₁ → G₂
 -- satisfying ℓ₁(a, b, c) iff ℓ₂(ga, gb, gc). When G₁ = G₂ one says that
@@ -112,8 +230,7 @@ theorem p_2
       simp
     case inr.inr _ =>
       simp
-      apply rel_sym_bca a b a
-      apply PG.l1 a b
+      apply rel_sym_bca a b a PG.l1 PG.l2 (PG.l1 a b)
 
 lemma star_imp_ell
   [PG : ProjectiveGeometry G ell]
@@ -121,15 +238,13 @@ lemma star_imp_ell
   (x_in_yz : x ∈ star (ell := ell) y z) :
     ell x y z := by
   obtain rfl | yz_neq := eq_or_ne y z
-  · apply rel_sym_bca y x y
-    apply PG.l1 y x
+  · apply rel_sym_bca y x y PG.l1 PG.l2 (PG.l1 y x)
   · unfold star at x_in_yz
     split at x_in_yz
     case inr.inl eq => apply yz_neq at eq; contradiction
     case inr.inr _ =>
       simp at x_in_yz
-      apply rel_sym_cab y z x
-      exact x_in_yz
+      apply rel_sym_cab y z x PG.l1 PG.l2 x_in_yz
 
 lemma abc_ncol_imp_neq
   [PG : ProjectiveGeometry G ell]
@@ -141,8 +256,7 @@ lemma abc_ncol_imp_neq
     intro ab_eq
     rw [ab_eq] at abc_ncol
     apply abc_ncol
-    apply rel_sym_cab b c b
-    apply PG.l1 b c
+    apply rel_sym_cab b c b PG.l1 PG.l2 (PG.l1 b c)
   case right =>
     constructor
     case left =>
@@ -154,8 +268,7 @@ lemma abc_ncol_imp_neq
       intro bc_eq
       rw [bc_eq] at abc_ncol
       apply abc_ncol
-      apply rel_sym_bca c a c
-      apply PG.l1 c a
+      apply rel_sym_bca c a c PG.l1 PG.l2 (PG.l1 c a)
 
 theorem p_3
   [PG : ProjectiveGeometry G ell]
@@ -178,8 +291,7 @@ theorem p_3
           contradiction
         case left.inr neq =>
           simp
-          apply rel_sym_acb a b c
-          exact abc_col
+          apply rel_sym_acb a b c PG.l1 PG.l2 abc_col
       · unfold star
         split
         case right.inl _ =>
@@ -220,17 +332,15 @@ theorem p_3
       rw [<- bd_eq] at pcd_col
       apply abc_col
       -- ℓ(a, c, b) follows from L₂, now.
-      apply rel_sym_acb a c b
+      apply rel_sym_acb a c b PG.l1 PG.l2
       apply PG.l2 a c b p
       · exact abp_col
-      · apply rel_sym_bca p c b
-        exact pcd_col
+      · apply rel_sym_bca p c b PG.l1 PG.l2 pcd_col
       · exact bp_neq
     have q_ex :
         ∃ q, ell q a c ∧ ell q b d := by
       apply PG.l3 a b c d p
-      · apply rel_sym_cab a b p
-        exact abp_col
+      · apply rel_sym_cab a b p PG.l1 PG.l2 abp_col
       · exact pcd_col
     match q_ex with
     | ⟨q, qac_col, qbd_col⟩ =>
@@ -245,19 +355,16 @@ theorem p_3
             contradiction
           case left.inr _ =>
             simp
-            apply rel_sym_bca q a c
-            exact qac_col
+            apply rel_sym_bca q a c PG.l1 PG.l2 qac_col
         · unfold star
           split
           case right.inl bd_eq =>
             contradiction
           case right.inr _ =>
             simp
-            apply rel_sym_bca q b d
-            exact qbd_col
+            apply rel_sym_bca q b d PG.l1 PG.l2 qbd_col
       rw [inter_empty] at q_in_inter
       exact q_in_inter
-
 
 theorem p_4
   [ProjectiveGeometry G ell]
@@ -300,16 +407,14 @@ theorem p_5
           simp
           split
           · contradiction
-          · apply rel_sym_bca p b c
-            exact c_in_ab
+          · apply rel_sym_bca p b c PG.l1 PG.l2 c_in_ab
       · obtain rfl | pc_neq := eq_or_ne p c
         · unfold star
           simp
           split
           · rename_i bp_eq
             exact id bp_eq.symm
-          · apply rel_sym_bca p b p
-            apply PG.l1 p b
+          · apply rel_sym_bca p b p PG.l1 PG.l2 (PG.l1 p b)
         · have b_in_pa :
               b ∈ star (ell := ell) p a := by
             apply p_4 p a b p_in_ab pa_neq
@@ -393,8 +498,7 @@ theorem p_9
       case h.right.inl ca_eq =>
         exact id ca_eq.symm
       case h.right.inr ca_neq =>
-        apply rel_sym_bca a c a
-        apply PG.l1 a c
+        apply rel_sym_bca a c a PG.l1 PG.l2 (PG.l1 a c)
   · obtain rfl | ab_eq := eq_or_ne a c
     · -- And if a = c, then one can choose q = b.
       use b
@@ -433,8 +537,7 @@ theorem p_9
             case h.right.inl.inl cq_eq =>
               exact id cq_eq.symm
             case h.right.inl.inr _ =>
-              apply rel_sym_bca q c q
-              apply PG.l1 q c
+              apply rel_sym_bca q c q PG.l1 PG.l2 (PG.l1 q c)
           · have c_in_qa :
                 c ∈ star (ell := ell) q a := by
               apply p_4 q a c q_in_ac qa_neq
