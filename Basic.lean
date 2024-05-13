@@ -203,6 +203,7 @@ class PG_Iso
 -- Let G = (G, ℓ) be a projective geometry. Then the operator ⋆ : G × G →
 -- Powerset(G) defined by a ⋆ b := {c ∈ G / ℓ(a, b, c)} if a ≠ b and a ⋆
 -- a := {a} satisfies P₁, P₂ and P₃.
+@[simp]
 def star
   [ProjectiveGeometry G ell]
   (a b : G) :
@@ -284,21 +285,14 @@ theorem p_3
       rw [inter_def]
       simp
       constructor
-      · unfold star
-        split
+      · split
         case left.inl eq =>
           apply ac_neq at eq
           contradiction
         case left.inr neq =>
-          simp
           apply rel_sym_acb a b c PG.l1 PG.l2 abc_col
-      · unfold star
-        split
-        case right.inl _ =>
-          simp
-        case right.inr _ =>
-          simp
-          apply PG.l1 b d
+      · right
+        apply PG.l1 b d
     rw [inter_empty] at b_in_inter
     exact b_in_inter
   · have abp_col :
@@ -349,19 +343,15 @@ theorem p_3
         rw [inter_def]
         simp
         constructor
-        · unfold star
-          split
+        · split
           case left.inl ac_eq =>
             contradiction
           case left.inr _ =>
-            simp
             apply rel_sym_bca q a c PG.l1 PG.l2 qac_col
-        · unfold star
-          split
+        · split
           case right.inl bd_eq =>
             contradiction
           case right.inr _ =>
-            simp
             apply rel_sym_bca q b d PG.l1 PG.l2 qbd_col
       rw [inter_empty] at q_in_inter
       exact q_in_inter
