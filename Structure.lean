@@ -5,7 +5,7 @@ open Basic
 
 variable [DecidableEq G]
 
-namespace Subspace
+namespace Structure
 
 class Subspace
   (PG : ProjectiveGeometry G ell) where
@@ -120,4 +120,4 @@ instance
     done
   ⟩
 
-end Subspace
+end Structure
