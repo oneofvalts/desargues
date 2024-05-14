@@ -120,19 +120,51 @@ instance
     done
   ⟩
 
-abbrev Line
-  (ell : G → G → G → Prop)
-  (a b : G) :
-    Set G :=
-  {c : G | a ≠ b ∧ ell a b c}
-
--- By 2.2.5 (p_8 and p_9) it follows that every line is a subspace.
-
-abbrev Plane
+@[simp]
+def Line
   [ProjectiveGeometry G ell]
-  (a b c : G)
-  (δ := Line (ell := ell) b c) :
+  (a b : G)
+  (ab_neq : a ≠ b) :
     Set G :=
-  sUnion {Basic.star (ell := ell) a x | x ∈ δ}
+  star (ell := ell) a b
+
+-- By 2.2.5 (p_8) it follows that every line is a subspace.
+instance
+  [PG : ProjectiveGeometry G ell]
+  (a b : G)
+  (ab_neq : a ≠ b) :
+    Subspace PG where
+  E := Line (ell := ell) a b ab_neq
+  closure := by
+    intro x y x_in_ab y_in_ab
+    unfold Line
+    unfold Line at x_in_ab
+    unfold Line at y_in_ab
+    by_cases xy_neq : x = y
+    case neg =>
+      have xy_ab_eq : _ :=
+        by apply p_8 (ell := ell) x y a b x_in_ab y_in_ab xy_neq
+      exact Eq.subset xy_ab_eq
+    case pos =>
+      rw [xy_neq]
+      rw [p_1]
+      exact singleton_subset_iff.mpr y_in_ab
+
+-- set_option linter.unusedVariables false in
+def Plane
+  [ProjectiveGeometry G ell]
+  (b c a : G)
+  (bc_neq : b ≠ c)
+  (a_nin_δ : Line (ell := ell) b c bc_neq) :
+    Set G :=
+  sUnion {star (ell := ell) a x | x ∈ Line (ell := ell) b c bc_neq}
+
+def Hyperplane
+  [ProjectiveGeometry G ell]
+  (b c a : G)
+  (bc_neq : b ≠ c)
+  (a_nin_δ : Line (ell := ell) b c bc_neq) :
+    Prop :=
+  ∃ g : G, g ∉ Plane (ell := ell) b c a bc_neq a_nin_δ
 
 end Structure
