@@ -13,7 +13,7 @@ require mathlib from git
   "https://github.com/leanprover-community/mathlib4.git"
 
 lean_lib «PV» where
-lean_lib «Subspace» where
+lean_lib «Structure» where
 
 @[default_target]
 lean_lib «Basic» where

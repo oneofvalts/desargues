@@ -120,4 +120,19 @@ instance
     done
   ⟩
 
+abbrev Line
+  (ell : G → G → G → Prop)
+  (a b : G) :
+    Set G :=
+  {c : G | a ≠ b ∧ ell a b c}
+
+-- By 2.2.5 (p_8 and p_9) it follows that every line is a subspace.
+
+abbrev Plane
+  [ProjectiveGeometry G ell]
+  (a b c : G)
+  (δ := Line (ell := ell) b c) :
+    Set G :=
+  sUnion {Basic.star (ell := ell) a x | x ∈ δ}
+
 end Structure
