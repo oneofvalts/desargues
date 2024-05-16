@@ -155,16 +155,7 @@ def Plane
   [ProjectiveGeometry G ell]
   (b c a : G)
   (bc_neq : b ≠ c)
-  (a_nin_δ : Line (ell := ell) b c bc_neq) :
+  (a_nin_δ : a ∉ Line (ell := ell) b c bc_neq) :
     Set G :=
   sUnion {star (ell := ell) a x | x ∈ Line (ell := ell) b c bc_neq}
-
-def Hyperplane
-  [ProjectiveGeometry G ell]
-  (b c a : G)
-  (bc_neq : b ≠ c)
-  (a_nin_δ : Line (ell := ell) b c bc_neq) :
-    Prop :=
-  ∃ g : G, g ∉ Plane (ell := ell) b c a bc_neq a_nin_δ
-
 end Structure
