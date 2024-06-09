@@ -210,7 +210,6 @@ def star
     Set G :=
   {c : G | if a = b then c = a else ell a b c}
 
-@[simp]
 theorem p_1
   [ProjectiveGeometry G ell]
   (a : G) :

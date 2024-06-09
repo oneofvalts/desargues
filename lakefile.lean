@@ -14,6 +14,7 @@ require mathlib from git
 
 lean_lib «PV» where
 lean_lib «Structure» where
+lean_lib «Examples» where
 
 @[default_target]
 lean_lib «Basic» where

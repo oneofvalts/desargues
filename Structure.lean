@@ -120,7 +120,6 @@ instance
     done
   ⟩
 
-@[simp]
 def Line
   [ProjectiveGeometry G ell]
   (a b : G)
@@ -158,4 +157,5 @@ def Plane
   (a_nin_δ : a ∉ Line (ell := ell) b c bc_neq) :
     Set G :=
   sUnion {star (ell := ell) a x | x ∈ Line (ell := ell) b c bc_neq}
+
 end Structure
