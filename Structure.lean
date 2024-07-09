@@ -8,8 +8,8 @@ variable [DecidableEq G]
 namespace Structure
 
 class Subspace
-  (PG : ProjectiveGeometry G ell) where
-  E : Set G
+  (PG : ProjectiveGeometry G ell)
+  (E : Set G) where
   closure : ∀ a b, a ∈ E → b ∈ E → star (ell := ell) a b ⊆ E
 
 class ProjectiveSubgeometry
@@ -21,20 +21,20 @@ class ProjectiveSubgeometry
 
 theorem subspace_l1
   [PG : ProjectiveGeometry G ell]
-  [S : Subspace PG]
-  (ell' : S.E → S.E → S.E → Prop)
-  (restriction : ∀ a b c : S.E, ell' a b c = ell a b c)
-  (a b : S.E) :
+  (E : Set G)
+  (ell' : E → E → E → Prop)
+  (restriction : ∀ a b c : E, ell' a b c = ell a b c)
+  (a b : E) :
     ell' a b a := by
   rw [restriction a b a]
   apply PG.l1 a b
 
 theorem subspace_l2
   [PG : ProjectiveGeometry G ell]
-  [S : Subspace PG]
-  (ell' : S.E → S.E → S.E → Prop)
-  (restriction : ∀ a b c : S.E, ell' a b c = ell a b c)
-  (a b p q : S.E)
+  (E : Set G)
+  (ell' : E → E → E → Prop)
+  (restriction : ∀ a b c : E, ell' a b c = ell a b c)
+  (a b p q : E)
   (apq_col : ell' a p q)
   (bpq_col : ell' b p q)
   (pq_neq : p ≠ q) :
@@ -50,9 +50,10 @@ theorem subspace_l2
 -- It is trivial that every subspace is a projective subgeometry.
 instance
   [PG : ProjectiveGeometry G ell]
-  [S : Subspace PG] :
-    ProjectiveSubgeometry PG S.E where
-  ell' := fun a b c => S.E.restrict (S.E.restrict (S.E.restrict ell a) b) c
+  (E : Set G)
+  [S : Subspace PG E] :
+    ProjectiveSubgeometry PG E where
+  ell' := fun a b c => E.restrict (E.restrict (E.restrict ell a) b) c
 
   -- restriction is trivial.
   restriction := by
@@ -77,9 +78,9 @@ instance
   done,
 
   by
-  let ell' := fun a b c => S.E.restrict
-                          (S.E.restrict
-                          (S.E.restrict ell a) b) c
+  let ell' := fun a b c => E.restrict
+                          (E.restrict
+                          (E.restrict ell a) b) c
   simp only [restrict]
   intro a b c d p pab_col pcd_col
   have q_ex :
@@ -89,10 +90,10 @@ instance
                 ∨ c = d ∨ c = p ∨ d = p)
   · apply l1_l2_eq_imp_l3 ell' a b c d p _ _ deq pab_col pcd_col
     · intro a b
-      apply subspace_l1 ell' _ a b
+      apply subspace_l1 (ell := ell) E ell' _ a b
       exact fun a b c ↦ rfl
     · intro a b p q apq_col bpq_col pq_neq
-      apply subspace_l2 ell' _ a b p q apq_col bpq_col pq_neq
+      apply subspace_l2 (ell := ell) E ell' _ a b p q apq_col bpq_col pq_neq
       exact fun a b c ↦ rfl
   · push_neg at deq
     match q_ex with
@@ -113,49 +114,51 @@ instance
             apply PG.l2 a b p q apq_col bpq_col pq_neq
           · exact qac_col
       have ac_subseteq_E :
-          star (ell := ell) a c ⊆ S.E := by
+          star (ell := ell) a c ⊆ E := by
         apply S.closure a c a.property c.property
       apply ac_subseteq_E at q_in_ac
       use ⟨q, q_in_ac⟩
     done
   ⟩
 
-def Line
+class Line
   [ProjectiveGeometry G ell]
-  (a b : G)
-  (ab_neq : a ≠ b) :
-    Set G :=
-  star (ell := ell) a b
+  (a b : G) where
+  δ : Set G
+  str : δ = star (ell := ell) a b
+  ab_neq : a ≠ b
 
 -- By 2.2.5 (p_8) it follows that every line is a subspace.
+-- See that Line.ab_neq is never used.
 instance
   [PG : ProjectiveGeometry G ell]
-  (a b : G)
-  (ab_neq : a ≠ b) :
-    Subspace PG where
-  E := Line (ell := ell) a b ab_neq
+  [L : Line (ell := ell) a b] :
+    Subspace PG L.δ where
   closure := by
     intro x y x_in_ab y_in_ab
-    unfold Line
-    unfold Line at x_in_ab
-    unfold Line at y_in_ab
+    intro z z_in_xy
     by_cases xy_neq : x = y
     case neg =>
+      rw [Line.str] at x_in_ab
+      rw [Line.str] at y_in_ab
       have xy_ab_eq : _ :=
         by apply p_8 (ell := ell) x y a b x_in_ab y_in_ab xy_neq
-      exact Eq.subset xy_ab_eq
+      rw [Line.str]
+      rw [<- xy_ab_eq]
+      exact z_in_xy
     case pos =>
-      rw [xy_neq]
-      rw [p_1]
-      exact singleton_subset_iff.mpr y_in_ab
+      rw [xy_neq] at z_in_xy
+      simp at z_in_xy
+      rw [<- xy_neq] at z_in_xy
+      rw [z_in_xy]
+      exact x_in_ab
 
--- set_option linter.unusedVariables false in
-def Plane
+class Plane
   [ProjectiveGeometry G ell]
   (b c a : G)
-  (bc_neq : b ≠ c)
-  (a_nin_δ : a ∉ Line (ell := ell) b c bc_neq) :
-    Set G :=
-  sUnion {star (ell := ell) a x | x ∈ Line (ell := ell) b c bc_neq}
+  (L : Line (ell := ell) b c) where
+  π : Set G
+  str : π = sUnion {star (ell := ell) a x | x ∈ L.δ}
+  a_nin_line : a ∉ L.δ
 
 end Structure

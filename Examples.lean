@@ -1,12 +1,9 @@
 import Mathlib.Data.List.Defs
 
-def a : Fin 7 := 6
-def b : Fin 7 := 3
-def c : Fin 7 := 2
+def fano (a b c : Fin 7) :=
+  List.permutations [a, b, c]
 
-open List
-
-#eval permutation
+#eval fano 2 5 6
 
 def fano_ell (a b c : Fin 7) : Prop :=
   match a with
