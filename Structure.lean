@@ -50,7 +50,6 @@ theorem subspace_l2
 -- It is trivial that every subspace is a projective subgeometry.
 instance
   [PG : ProjectiveGeometry G ell]
-  (E : Set G)
   [S : Subspace PG E] :
     ProjectiveSubgeometry PG E where
   ell' := fun a b c => E.restrict (E.restrict (E.restrict ell a) b) c
@@ -121,29 +120,19 @@ instance
     done
   ⟩
 
-class Line
-  [ProjectiveGeometry G ell]
-  (a b : G) where
-  δ : Set G
-  str : δ = star (ell := ell) a b
-  ab_neq : a ≠ b
-
 -- By 2.2.5 (p_8) it follows that every line is a subspace.
--- See that Line.ab_neq is never used.
+-- In fact, I prove a general statement: Every star is a subspace. This means
+-- singletons, too, are subspaces.
 instance
   [PG : ProjectiveGeometry G ell]
-  [L : Line (ell := ell) a b] :
-    Subspace PG L.δ where
+  (a b : G) :
+    Subspace PG (star (ell := ell) a b)  where
   closure := by
-    intro x y x_in_ab y_in_ab
-    intro z z_in_xy
+    intro x y x_in_ab y_in_ab z z_in_xy
     by_cases xy_neq : x = y
     case neg =>
-      rw [Line.str] at x_in_ab
-      rw [Line.str] at y_in_ab
       have xy_ab_eq : _ :=
         by apply p_8 (ell := ell) x y a b x_in_ab y_in_ab xy_neq
-      rw [Line.str]
       rw [<- xy_ab_eq]
       exact z_in_xy
     case pos =>
@@ -153,12 +142,23 @@ instance
       rw [z_in_xy]
       exact x_in_ab
 
-class Plane
+def galaxy
   [ProjectiveGeometry G ell]
-  (b c a : G)
-  (L : Line (ell := ell) b c) where
-  π : Set G
-  str : π = sUnion {star (ell := ell) a x | x ∈ L.δ}
-  a_nin_line : a ∉ L.δ
+  (b c a : G) :
+    Set G :=
+  sUnion {star (ell := ell) a x | x ∈ star (ell := ell) b c}
+
+-- Planes are subspaces will follow from 2.4.4, but it is a useful exercise to
+-- prove it now, using the properties (P_i). As similar to above, I will prove
+-- more generally that galaxies are subspaces.
+instance
+  [PG : ProjectiveGeometry G ell]
+  (b c a: G) :
+    Subspace PG (galaxy (ell := ell) b c a)  where
+  closure := by
+    intro k l k_in_ab l_in_ab m m_in_xy
+    unfold galaxy at k_in_ab
+    unfold galaxy at l_in_ab
+    #exit
 
 end Structure
