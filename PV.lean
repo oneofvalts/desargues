@@ -1,11 +1,11 @@
 import Mathlib.LinearAlgebra.Projectivization.Basic
 import Mathlib.LinearAlgebra.Projectivization.Independence
-import Desargues
+import Basic
 
 open Finset Set Submodule FiniteDimensional Projectivization
 open scoped LinearAlgebra.Projectivization
 
-open Desargues
+open Basic
 
 variable [DivisionRing K] [AddCommGroup V] [Module K V]
 
@@ -58,13 +58,11 @@ theorem l2_rep
     ¬ LinearIndependent K ![a, b, p] := by
   -- p and q are not the same points.
   have pq_neq : p ≠ q := by sorry
-  -- a,b,p,q are in the span of p,q.
-  have a_span_pq : a ∈ span K {p, q} := by {
-  apply lin_dep_imp_span a p q pq_indep apq_dep
-  }
-  have b_span_pq : b ∈ span K {p, q} := by {
-  apply lin_dep_imp_span b p q pq_indep bpq_dep
-  }
+  -- a, b, p, q are in the span of p, q.
+  have a_span_pq : a ∈ span K {p, q} := by
+    apply lin_dep_imp_span a p q pq_indep apq_dep
+  have b_span_pq : b ∈ span K {p, q} := by
+    apply lin_dep_imp_span b p q pq_indep bpq_dep
   have ppq_dep : ¬ LinearIndependent K ![p, p, q] :=
     by apply (lin_dep_aab p q)
   have p_span_pq : p ∈ span K {p, q} :=
@@ -77,12 +75,14 @@ theorem l2_rep
   sorry
 
 -- Every Projectivization is a ProjectiveGeometry
-instance : ProjectiveGeometry (ℙ K V) :=
+instance :
+  ProjectiveGeometry (ℙ K V)
+  (fun X Y Z => ¬ Independent ![X, Y, Z]) :=
 ⟨
 -- fun X Y Z => ∃ k1 k2 k3 : K, ¬(k1 = 0 ∧ k2 = 0 ∧ k3 = 0) ∧ k1 • X.rep + k2 • Y.rep + k3 • Z.rep = 0,
 -- fun X Y Z => ¬ LinearIndependent K ![X.rep, Y.rep, Z.rep],
 -- fun X Y Z => Dependent (index X Y Z),
-fun X Y Z => ¬ Independent ![X, Y, Z],
+-- fun X Y Z => ¬ Independent ![X, Y, Z],
 
 by
 intro A B
@@ -91,8 +91,7 @@ rw [not_linearIndependent_iff]
 use {0, 1, 2}, ![1, 0, -1]
 constructor
 simp
-simp
-done,
+simp,
 
 by
 intro A B P Q
@@ -105,8 +104,7 @@ rw [independent_iff, rep_comp_3]
 apply l2_rep A.rep B.rep P.rep Q.rep
 · exact ABPcol
 · exact BPQcol
-· exact PQ_neq
-done,
+· exact PQ_neq,
 
 sorry
 ⟩

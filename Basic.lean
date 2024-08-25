@@ -239,13 +239,13 @@ def star
 theorem p_1
   [ProjectiveGeometry G ell]
   (a : G) :
-    star (ell := ell) a a = {a} := by
+    star ell a a = {a} := by
   unfold star
   simp
 
 theorem p_2
   [PG : ProjectiveGeometry G ell] :
-    ∀ a b, a ∈ star (ell := ell) b a := by
+    ∀ a b, a ∈ star ell b a := by
   intro a b
   unfold star
   obtain rfl | _ := eq_or_ne a b
@@ -261,7 +261,7 @@ theorem p_2
 theorem star_imp_ell
   [PG : ProjectiveGeometry G ell]
   (x y z : G)
-  (x_in_yz : x ∈ star (ell := ell) y z) :
+  (x_in_yz : x ∈ star ell y z) :
     ell x y z := by
   obtain rfl | yz_neq := eq_or_ne y z
   · apply rel_sym_bca y x y PG.l1 PG.l2 (PG.l1 y x)
@@ -275,14 +275,14 @@ theorem star_imp_ell
 theorem p_3
   [PG : ProjectiveGeometry G ell]
   (a b c d p : G)
-  (a_in_bp : a ∈ star (ell := ell) b p)
-  (p_in_cd : p ∈ star (ell := ell) c d)
+  (a_in_bp : a ∈ star ell b p)
+  (p_in_cd : p ∈ star ell c d)
   (ac_neq : a ≠ c) :
-    star (ell := ell) a c ∩ star (ell := ell) b d ≠ ∅ := by
+    star ell a c ∩ star ell b d ≠ ∅ := by
   intro inter_empty
   by_cases abc_col : ell a b c
   · have b_in_inter :
-        b ∈ star (ell := ell) a c ∩ star (ell := ell) b d := by
+        b ∈ star ell a c ∩ star ell b d := by
       rw [inter_def]
       simp
       constructor
@@ -340,7 +340,7 @@ theorem p_3
     match q_ex with
     | ⟨q, qac_col, qbd_col⟩ =>
       have q_in_inter :
-          q ∈ star (ell := ell) a c ∩ star (ell := ell) b d := by
+          q ∈ star ell a c ∩ star ell b d := by
         rw [inter_def]
         simp
         constructor
@@ -360,11 +360,11 @@ theorem p_3
 theorem p_4
   [ProjectiveGeometry G ell]
   (a b c : G)
-  (a_in_bc : a ∈ star (ell := ell) b c)
+  (a_in_bc : a ∈ star ell b c)
   (ab_neq : a ≠ b) :
-    c ∈ star (ell := ell) a b := by
+    c ∈ star ell a b := by
   have inter_nempty :
-      star (ell := ell) a b ∩ star (ell := ell) c c ≠ ∅ := by
+      star ell a b ∩ star ell c c ≠ ∅ := by
     apply p_3 a c b c a (p_2 a c) a_in_bc ab_neq
   unfold star at inter_nempty
   simp at inter_nempty
@@ -373,8 +373,8 @@ theorem p_4
 theorem p_5
   [PG : ProjectiveGeometry G ell]
   (a b c : G)
-  (a_in_bc : a ∈ star (ell := ell) b c) :
-    star (ell := ell) a b ⊆ star (ell := ell) b c := by
+  (a_in_bc : a ∈ star ell b c) :
+    star ell a b ⊆ star ell b c := by
   -- We may assume that a ≠ b (and hence b ≠ c) by P₁.
   intro p p_in_ab
   obtain rfl | ab_neq := eq_or_ne a b
@@ -386,7 +386,7 @@ theorem p_5
       contradiction
     · -- In particular, one has c ∈ a ⋆ b by P₄.
       have c_in_ab :
-          c ∈ star (ell := ell) a b := by
+          c ∈ star ell a b := by
         apply p_4 a b c a_in_bc ab_neq
       -- We may assume that p ≠ a and p ≠ c.
       obtain rfl | pa_neq := eq_or_ne p a
@@ -407,18 +407,18 @@ theorem p_5
             exact id bp_eq.symm
           · apply rel_sym_bca p b p PG.l1 PG.l2 (PG.l1 p b)
         · have b_in_pa :
-              b ∈ star (ell := ell) p a := by
+              b ∈ star ell p a := by
             apply p_4 p a b p_in_ab pa_neq
           have inter_nempty :
-              star (ell := ell) c p ∩ star (ell := ell) a a ≠ ∅ := by
+              star ell c p ∩ star ell a a ≠ ∅ := by
             apply p_3 c a p a b c_in_ab b_in_pa (id (Ne.symm pc_neq))
           have a_in_cp :
-              a ∈ star (ell := ell) c p := by
+              a ∈ star ell c p := by
             unfold star at inter_nempty
             simp at inter_nempty
             apply inter_nempty
           have inter_nempty :
-              star (ell := ell) b c ∩ star (ell := ell) p p ≠ ∅ := by
+              star ell b c ∩ star ell p p ≠ ∅ := by
             apply p_3 b p c p a b_in_pa a_in_cp bc_neq
           unfold star at inter_nempty
           simp at inter_nempty
@@ -427,7 +427,7 @@ theorem p_5
 theorem p_6
   [ProjectiveGeometry G ell]
   (a b : G) :
-    star (ell := ell) a b = star (ell := ell) b a := by
+    star ell a b = star ell b a := by
   apply eq_of_subset_of_subset
   · apply p_5 a b a (p_2 a b)
   · apply p_5 b a b (p_2 b a)
@@ -435,11 +435,11 @@ theorem p_6
 theorem p_7
   [ProjectiveGeometry G ell]
   (a b c : G)
-  (a_in_bc : a ∈ star (ell := ell) b c)
+  (a_in_bc : a ∈ star ell b c)
   (ab_neq : a ≠ b) :
-    star (ell := ell) a b = star (ell := ell) b c := by
+    star ell a b = star ell b c := by
   have c_in_ba :
-      c ∈ star (ell := ell) b a := by
+      c ∈ star ell b a := by
     rw [<- p_6 a b]
     apply p_4 a b c a_in_bc ab_neq
   apply p_5 c b a at c_in_ba
@@ -451,10 +451,10 @@ theorem p_7
 theorem p_8
   [ProjectiveGeometry G ell]
   (a b c d : G)
-  (a_in_cd : a ∈ star (ell := ell) c d)
-  (b_in_cd : b ∈ star (ell := ell) c d)
+  (a_in_cd : a ∈ star ell c d)
+  (b_in_cd : b ∈ star ell c d)
   (ab_neq : a ≠ b) :
-    star (ell := ell) a b = star (ell := ell) c d := by
+    star ell a b = star ell c d := by
     obtain rfl | bc_neq := eq_or_ne b c
     · rw [p_7 a b d a_in_cd ab_neq]
     · rw [<- p_7 b c d b_in_cd bc_neq]
@@ -464,18 +464,18 @@ theorem p_8
 theorem p_9
   [PG : ProjectiveGeometry G ell]
   (a b c d p : G)
-  (a_in_bp : a ∈ star (ell := ell) b p)
-  (p_in_cd : p ∈ star (ell := ell) c d) :
-    ∃ q : G, q ∈ star (ell := ell) b d ∧ a ∈ star (ell := ell) c q := by
-  by_cases c_in_bd : c ∈ star (ell := ell) b d
+  (a_in_bp : a ∈ star ell b p)
+  (p_in_cd : p ∈ star ell c d) :
+    ∃ q : G, q ∈ star ell b d ∧ a ∈ star ell c q := by
+  by_cases c_in_bd : c ∈ star ell b d
   · have cd_subseteq_bd :
-        star (ell := ell) c d ⊆ star (ell := ell) b d := by
+        star ell c d ⊆ star ell b d := by
       rw [p_6 b d]
       rw [p_6 b d] at c_in_bd
       apply p_5 c d b c_in_bd
     apply cd_subseteq_bd at p_in_cd
     have pb_subseteq_bd :
-        star (ell := ell) p b ⊆ star (ell := ell) b d := by
+        star ell p b ⊆ star ell b d := by
       apply p_5 p b d p_in_cd
     rw [p_6 b p] at a_in_bp
     apply pb_subseteq_bd at a_in_bp
@@ -504,8 +504,8 @@ theorem p_9
         apply PG.l1 a b
     · -- So we may assume that c ∉ b ⋆ d and a ≠ c.
       have q_ex :
-          ∃ q, q ∈ star (ell := ell) a c ∩ star (ell := ell) b d := by
-        let inter := star (ell := ell) a c ∩ star (ell := ell) b d
+          ∃ q, q ∈ star ell a c ∩ star ell b d := by
+        let inter := star ell a c ∩ star ell b d
         rw [<- nonempty_def]
         have disj :
             inter = ∅ ∨ Set.Nonempty inter :=
@@ -530,7 +530,7 @@ theorem p_9
             case h.right.inl.isFalse _ =>
               apply rel_sym_bca q c q PG.l1 PG.l2 (PG.l1 q c)
           · have c_in_qa :
-                c ∈ star (ell := ell) q a := by
+                c ∈ star ell q a := by
               apply p_4 q a c q_in_ac qa_neq
             have cq_neq :
                 c ≠ q := by
@@ -539,26 +539,44 @@ theorem p_9
               exact c_in_bd q_in_bd
             apply p_4 c q a c_in_qa cq_neq
 
-def central_projection
-  (a b c z: G)
-  (ell : G → G → G → Prop)
-  (x : star (ell := ell) a c) :
-    Set G :=
-  star (ell := ell) x z ∩ star (ell := ell) b c
+-- set_option diagnostics true
+-- set_option diagnostics.threshold 10000
 
-set_option trace.split.failure true
+def central_projection
+  (a b c z : G)
+  (ell : G → G → G → Prop)
+  (x : star ell a c) :
+    Set (star ell b c) :=
+  Subtype.val ⁻¹' (star ell x z ∩ star ell b c)
+
+-- def central_projection
+--   (a b c z : G)
+--   (ell : G → G → G → Prop)
+--   (x : star ell a c) :
+--     Set G :=
+--   star ell x z ∩ star ell b c
+
+-- theorem cen_proj_in_line
+--   (a b c z : G)
+--   (x : star ell a c) :
+--     central_projection a b c z ell x ⊆ star ell b c := by
+--   unfold central_projection
+--   rw [subset_def (s := star ell x.val z ∩ star ell b c) (t := star ell b c)]
+--   intro xx xx_in_inter
+--   exact mem_of_mem_inter_right xx_in_inter
 
 theorem star_nempty_and_neq_imp_sing
   [PG : ProjectiveGeometry G ell]
   (a b c d : G)
-  (nempty : star (ell := ell) a b ∩ star (ell := ell) c d ≠ ∅)
-  (neq : star (ell := ell) a b ≠ star (ell := ell) c d) :
-    (star (ell := ell) a b ∩ star (ell := ell) c d).ncard = 1 := by
+  (nempty : star ell a b ∩ star ell c d ≠ ∅)
+  (neq : star ell a b ≠ star ell c d) :
+    -- (star ell a b ∩ star ell c d).ncard = 1 := by
+    ∃ y, star ell a b ∩ star ell c d = {y} := by
   rw [<- nonempty_iff_ne_empty] at nempty
   rw [nonempty_def] at nempty
   match nempty with
   | ⟨x, x_in_ab, x_in_cd⟩ =>
-  rw [ncard_eq_one]
+  -- rw [ncard_eq_one]
   use x
   apply eq_of_subset_of_subset
   · intro y y_in_inter
@@ -571,10 +589,10 @@ theorem star_nempty_and_neq_imp_sing
         ¬ x ≠ y := by
       intro xy_neq
       have xy_eq_ab :
-          star (ell := ell) x y = star (ell := ell) a b := by
+          star ell x y = star ell a b := by
         apply p_8 x y a b x_in_ab y_in_ab xy_neq
       have xy_eq_cd :
-          star (ell := ell) x y = star (ell := ell) c d := by
+          star ell x y = star ell c d := by
         apply p_8 x y c d x_in_cd y_in_cd xy_neq
       rw [xy_eq_ab] at xy_eq_cd
       apply neq
@@ -590,7 +608,7 @@ theorem abc_inter_sing
   [PG : ProjectiveGeometry G ell]
   (a b c : G)
   (abc_ncol : ¬ ell a b c) :
-    star (ell := ell) a b ∩ star (ell := ell) a c = {a} := by
+    star ell a b ∩ star ell a c = {a} := by
   apply eq_of_subset_of_subset
   · intro x x_in_inter
     have neq := by apply ncol_imp_neq a b c abc_ncol
@@ -631,25 +649,24 @@ theorem abc_inter_sing
 theorem cen_proj_sing
   [PG : ProjectiveGeometry G ell]
   (a b c : G)
+  (z : star ell a b)
+  (x : star ell a c)
   (abc_ncol : ¬ ell a b c)
-  (z : star (ell := ell) a b)
-  (x : star (ell := ell) a c)
   (az_neq : a ≠ z)
   (bz_neq : b ≠ z) :
-    (central_projection (ell := ell) a b c z x).ncard = 1  := by
+    ∃ y, central_projection a b c z ell x = {y} := by
   have z_nin_ac :
-      z.val ∉ star (ell := ell) a c := by
+      z.val ∉ star ell a c := by
     have inter_eq_a := by apply abc_inter_sing (ell := ell) a b c abc_ncol
     intro z_in_ac
     let zp := z.property
     have z_in_inter :
-        z.val ∈ star (ell := ell) a b ∩ star (ell := ell) a c := by
+        z.val ∈ star ell a b ∩ star ell a c := by
       exact mem_inter zp z_in_ac
     rw [inter_eq_a] at z_in_inter
-    simp at z_in_inter
-    exact az_neq (id (Eq.symm z_in_inter))
+    exact id (Ne.symm az_neq) z_in_inter
   have z_nin_cb :
-      z.val ∉ star (ell := ell) c b := by
+      z.val ∉ star ell c b := by
     have bca_ncol :
         ¬ell b c a := by
       intro bca_col
@@ -663,15 +680,14 @@ theorem cen_proj_sing
     rw [<- p_6 a b] at inter_eq_b
     let zp := z.property
     have z_in_inter :
-        z.val ∈ star (ell := ell) b c ∩ star (ell := ell) a b := by
+        z.val ∈ star ell b c ∩ star ell a b := by
       exact mem_inter z_in_cb zp
     rw [inter_eq_b] at z_in_inter
-    simp at z_in_inter
-    exact bz_neq (id (Eq.symm z_in_inter))
-  rw [ncard_eq_one]
+    exact id (Ne.symm bz_neq) z_in_inter
+  -- rw [ncard_eq_one]
   -- (x ⋆ z) ∩ (b ⋆ c) ≠ ∅ by P₃
   have nempty :
-      star (ell := ell) x.val z ∩ star (ell := ell) c b ≠ ∅ := by
+      star ell x.val z ∩ star ell c b ≠ ∅ := by
     apply p_3 (ell := ell) x.val c z b a
     · rw [p_6 (ell := ell) c a]
       exact x.property
@@ -685,12 +701,72 @@ theorem cen_proj_sing
   unfold central_projection
   rw [p_6 (ell := ell) b c]
   have xz_neq_cb :
-      star (ell := ell) x z ≠ star (ell := ell) c b := by
+      star ell x z ≠ star ell c b := by
     intro xz_eq_cb
     rw [<- xz_eq_cb] at z_nin_cb
     apply z_nin_cb
     apply p_2 z.val x
   have sing := by apply star_nempty_and_neq_imp_sing x.val z.val c b nempty xz_neq_cb
-  exact ncard_eq_one.mp sing
+  -- exact ncard_eq_one.mp sing
+  match sing with
+  | ⟨y, y_in_inter⟩ =>
+    have y_in_cb :
+        y ∈ star ell c b := by
+      apply mem_of_mem_inter_right (a := (star ell x.val z.val))
+      rw [y_in_inter]
+      exact rfl
+    use ⟨y, y_in_cb⟩
+    rw [y_in_inter]
+    aesop
+
+class CentralProjectionQuadruple
+  (ell : G → G → G → Prop)
+  (a b c : G)
+  (z : star ell a b) where
+  abc_ncol : ¬ ell a b c
+  az_neq : a ≠ z
+  bz_neq : b ≠ z
+
+noncomputable def cen_proj_map
+  [PG : ProjectiveGeometry G ell]
+  (a b c : G)
+  (z : star ell a b)
+  [CPQ : CentralProjectionQuadruple ell a b c z]
+  (x : star ell a c) :
+    star ell b c :=
+  Exists.choose (cen_proj_sing (PG := PG) a b c z x CPQ.abc_ncol CPQ.az_neq CPQ.bz_neq)
+
+instance
+  [PG : ProjectiveGeometry G ell]
+  [CPQ : CentralProjectionQuadruple ell a b c z] :
+    have zp_sym :
+        z.val ∈ star ell b a := by
+      rw [<- p_6 (ell := ell) a b]
+      exact z.property
+    CentralProjectionQuadruple ell b a c ⟨z.val, zp_sym⟩ where
+  abc_ncol := by
+    intro bac_col
+    apply CPQ.abc_ncol
+    apply rel_sym_bac b a c PG.l1 PG.l2 bac_col
+  az_neq := by exact CentralProjectionQuadruple.bz_neq c
+  bz_neq := by exact CentralProjectionQuadruple.az_neq c
+
+theorem cen_proj_bij
+  [PG : ProjectiveGeometry G ell]
+  [CPQ : CentralProjectionQuadruple ell a b c z] :
+    Function.Bijective (cen_proj_map (ell := ell) a b c z) := by
+  have zp_sym :
+      z.val ∈ star ell b a := by
+    rw [<- p_6 (ell := ell) a b]
+    exact z.property
+  let inverse := (cen_proj_map (ell := ell) b a c ⟨z, zp_sym⟩)
+  rw [Function.bijective_iff_has_inverse]
+  use inverse
+  constructor
+  · unfold Function.LeftInverse
+    intro x
+    unfold_let
+    sorry
+  · sorry
 
 end Basic
