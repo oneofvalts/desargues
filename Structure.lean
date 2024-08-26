@@ -1,16 +1,10 @@
 import Basic
+import LeanCopilot
 
 open Set
 open Basic
 
-variable [DecidableEq G]
-
 namespace Structure
-
-class Subspace
-  (PG : ProjectiveGeometry G ell)
-  (E : Set G) where
-  closure : ∀ a b, a ∈ E → b ∈ E → star (ell := ell) a b ⊆ E
 
 class ProjectiveSubgeometry
   (PG : ProjectiveGeometry G ell)
@@ -47,6 +41,13 @@ theorem subspace_l2
   have pq_eq : p = q := by { exact SetCoe.ext ppqq_eq }
   contradiction
 
+variable [DecidableEq G]
+
+class Subspace
+  (PG : ProjectiveGeometry G ell)
+  (E : Set G) where
+  closure : ∀ a b, a ∈ E → b ∈ E → star (ell := ell) a b ⊆ E
+
 -- It is trivial that every subspace is a projective subgeometry.
 instance
   [PG : ProjectiveGeometry G ell]
@@ -58,14 +59,12 @@ instance
   restriction := by
     intro a b c
     simp
-    done
 
   inst := ⟨
   by
   simp only [restrict]
   intro a b
-  apply PG.l1 a b
-  done,
+  apply PG.l1 a b,
 
   by
   simp only [restrict]
@@ -73,8 +72,7 @@ instance
   apply PG.l2 a b p q apq_col bpq_col
   intro ppqq_eq
   have pq_eq : p = q := by { exact SetCoe.ext ppqq_eq }
-  contradiction
-  done,
+  contradiction,
 
   by
   let ell' := fun a b c => E.restrict
@@ -101,11 +99,11 @@ instance
           q ∈ star (ell := ell) a c := by
         simp
         split
-        case inl aacc_eq =>
+        case isTrue aacc_eq =>
           have ac_eq : a = c := by { exact SetCoe.ext aacc_eq }
           match deq with
           | ⟨_, ac_neq, _⟩ => contradiction
-        case inr aacc_neq =>
+        case isFalse aacc_neq =>
           apply rel_sym_bca q a c
           · intro a b
             apply PG.l1 a b
@@ -117,7 +115,6 @@ instance
         apply S.closure a c a.property c.property
       apply ac_subseteq_E at q_in_ac
       use ⟨q, q_in_ac⟩
-    done
   ⟩
 
 -- By 2.2.5 (p_8) it follows that every line is a subspace.
@@ -131,7 +128,7 @@ instance
     intro x y x_in_ab y_in_ab z z_in_xy
     by_cases xy_neq : x = y
     case neg =>
-      have xy_ab_eq : _ :=
+      have xy_ab_eq :=
         by apply p_8 (ell := ell) x y a b x_in_ab y_in_ab xy_neq
       rw [<- xy_ab_eq]
       exact z_in_xy
@@ -159,6 +156,7 @@ instance
     intro k l k_in_ab l_in_ab m m_in_xy
     unfold galaxy at k_in_ab
     unfold galaxy at l_in_ab
-    #exit
+    unfold galaxy
+    simp
 
 end Structure
