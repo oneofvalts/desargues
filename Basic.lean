@@ -1,6 +1,7 @@
-import Mathlib.Tactic
+-- import Mathlib.Tactic
 import Mathlib.Data.Set.Card
-import Mathlib
+-- import Mathlib
+-- import LeanCopilot
 
 open Set
 
@@ -27,6 +28,8 @@ theorem rel_sym_acb
   (abc_col : ell a b c) :
     ell a c b := by
   obtain rfl | bc_neq := eq_or_ne b c
+  -- tauto
+  -- tauto
   · -- b = c, meaning abc and acb becomes abb
     exact abc_col
   · apply l2 a c b c
@@ -42,6 +45,8 @@ theorem rel_sym_cab
   (abc_col : ell a b c) :
     ell c a b := by
   obtain rfl | bc_neq := eq_or_ne b c
+  -- tauto
+  -- tauto
   · apply l1 b a
   · apply l2 c a b c
     · apply l1 c b
@@ -633,8 +638,12 @@ theorem abc_inter_sing
         | intro _ rest =>
           cases rest with
           | intro ac_neq _ =>
-            simp at ac_neq
-            have cab_col : ell c a b := by aesop
+            have cab_col :
+                ell c a b := by
+              split at b_in_ab
+              · rw [b_in_ab]
+                apply PG.l1 c a
+              · exact b_in_ab
             apply abc_ncol
             apply rel_sym_bca c a b PG.l1 PG.l2 cab_col
       simp at ax_neq_neq
@@ -694,7 +703,7 @@ theorem cen_proj_sing
     · apply p_4
       · rw [p_6 (ell := ell) b a]
         exact z.property
-      · aesop
+      · exact id (Ne.symm bz_neq)
     · intro xz_eq
       rw [<- xz_eq] at z_nin_ac
       exact z_nin_ac x.property
@@ -717,7 +726,9 @@ theorem cen_proj_sing
       exact rfl
     use ⟨y, y_in_cb⟩
     rw [y_in_inter]
-    aesop
+    apply eq_of_subset_of_subset
+    · simp
+    · simp
 
 class CentralProjectionQuadruple
   (ell : G → G → G → Prop)
