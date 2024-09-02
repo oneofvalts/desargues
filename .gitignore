@@ -1,2 +1,5 @@
 /.lake
 *.org
+lab
+lean-toolchain
+lake-manifest.json
