@@ -29,7 +29,6 @@ theorem rel_sym_acb
     ell a c b := by
   obtain rfl | bc_neq := eq_or_ne b c
   -- tauto
-  -- tauto
   · -- b = c, meaning abc and acb becomes abb
     exact abc_col
   · apply l2 a c b c
@@ -554,22 +553,6 @@ def central_projection
     Set (star ell b c) :=
   Subtype.val ⁻¹' (star ell x z ∩ star ell b c)
 
--- def central_projection
---   (a b c z : G)
---   (ell : G → G → G → Prop)
---   (x : star ell a c) :
---     Set G :=
---   star ell x z ∩ star ell b c
-
--- theorem cen_proj_in_line
---   (a b c z : G)
---   (x : star ell a c) :
---     central_projection a b c z ell x ⊆ star ell b c := by
---   unfold central_projection
---   rw [subset_def (s := star ell x.val z ∩ star ell b c) (t := star ell b c)]
---   intro xx xx_in_inter
---   exact mem_of_mem_inter_right xx_in_inter
-
 theorem star_nempty_and_neq_imp_sing
   [PG : ProjectiveGeometry G ell]
   (a b c d : G)
@@ -746,6 +729,15 @@ noncomputable def cen_proj_map
   (x : star ell a c) :
     star ell b c :=
   Exists.choose (cen_proj_sing (PG := PG) a b c z x CPQ.abc_ncol CPQ.az_neq CPQ.bz_neq)
+
+theorem cen_proj_arg_col
+  [PG : ProjectiveGeometry G ell]
+  (a b c : G)
+  (z : star ell a b)
+  [CPQ : CentralProjectionQuadruple ell a b c z]
+  (x : star ell a c) :
+    ell z x (cen_proj_map (ell := ell) a b c z x) := by
+  sorry
 
 instance
   [PG : ProjectiveGeometry G ell]
