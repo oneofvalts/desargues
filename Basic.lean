@@ -1,7 +1,7 @@
 -- import Mathlib.Tactic
 import Mathlib.Data.Set.Card
 -- import Mathlib
--- import LeanCopilot
+import LeanCopilot
 
 open Set
 
@@ -730,14 +730,30 @@ noncomputable def cen_proj_map
     star ell b c :=
   Exists.choose (cen_proj_sing (PG := PG) a b c z x CPQ.abc_ncol CPQ.az_neq CPQ.bz_neq)
 
+theorem cen_proj_map_property
+  [PG : ProjectiveGeometry G ell]
+  (a b c : G)
+  (z : star ell a b)
+  [CPQ : CentralProjectionQuadruple ell a b c z]
+  (x : star ell a c) :
+    cen_proj_map (ell := ell) a b c z x ∈ Subtype.val ⁻¹' star ell x z := by
+  have cpm_property := by
+    apply Exists.choose_spec (cen_proj_sing (PG := PG) a b c z x CPQ.abc_ncol CPQ.az_neq CPQ.bz_neq)
+  unfold cen_proj_map
+  rw [← singleton_subset_iff]
+  rw [<- cpm_property]
+  unfold central_projection
+  simp only [preimage_inter, inter_subset_left]
+
 theorem cen_proj_arg_col
   [PG : ProjectiveGeometry G ell]
   (a b c : G)
   (z : star ell a b)
   [CPQ : CentralProjectionQuadruple ell a b c z]
   (x : star ell a c) :
-    ell z x (cen_proj_map (ell := ell) a b c z x) := by
-  sorry
+    ell (cen_proj_map (ell := ell) a b c z x) x z:= by
+  apply star_imp_ell
+  apply cen_proj_map_property
 
 instance
   [PG : ProjectiveGeometry G ell]
