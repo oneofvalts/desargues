@@ -755,7 +755,7 @@ theorem cen_proj_arg_col
   apply star_imp_ell
   apply cen_proj_map_property
 
-instance
+instance cpq_symmetry
   [PG : ProjectiveGeometry G ell]
   [CPQ : CentralProjectionQuadruple ell a b c z] :
     have zp_sym :
