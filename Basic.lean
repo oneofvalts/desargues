@@ -785,7 +785,13 @@ theorem cen_proj_bij
   · unfold Function.LeftInverse
     intro x
     unfold_let
+    have col := by apply cen_proj_arg_col a b c z x
+    have col_sym := by apply cen_proj_arg_col (ell := ell) b a c ⟨z, zp_sym⟩ (cen_proj_map (ell := ell) a b c z x)
     sorry
-  · sorry
+  · unfold Function.RightInverse
+    unfold Function.LeftInverse
+    intro y
+    unfold_let
+    sorry
 
 end Basic
