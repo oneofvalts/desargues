@@ -1,7 +1,7 @@
 -- import Mathlib.Tactic
 import Mathlib.Data.Set.Card
 -- import Mathlib
-import LeanCopilot
+-- import LeanCopilot
 
 open Set
 
@@ -558,7 +558,6 @@ theorem star_nempty_and_neq_imp_sing
   (a b c d : G)
   (nempty : star ell a b ∩ star ell c d ≠ ∅)
   (neq : star ell a b ≠ star ell c d) :
-    -- (star ell a b ∩ star ell c d).ncard = 1 := by
     ∃ y, star ell a b ∩ star ell c d = {y} := by
   rw [<- nonempty_iff_ne_empty] at nempty
   rw [nonempty_def] at nempty
@@ -635,8 +634,9 @@ theorem abc_inter_sing
     rw [inter_def]
     simp
     constructor
-    · intro _; apply PG.l1 a b
-    · intro _; apply PG.l1 a c
+    all_goals intro _
+    · apply PG.l1 a b
+    · apply PG.l1 a c
 
 theorem cen_proj_sing
   [PG : ProjectiveGeometry G ell]
@@ -710,8 +710,7 @@ theorem cen_proj_sing
     use ⟨y, y_in_cb⟩
     rw [y_in_inter]
     apply eq_of_subset_of_subset
-    · simp
-    · simp
+    all_goals simp
 
 class CentralProjectionQuadruple
   (ell : G → G → G → Prop)
@@ -728,6 +727,7 @@ noncomputable def cen_proj_map
   [CPQ : CentralProjectionQuadruple ell a b c z]
   (x : star ell a c) :
     star ell b c :=
+  -- (cen_proj_sing (PG := PG) a b c z x CPQ.abc_ncol CPQ.az_neq CPQ.bz_neq).choose
   Exists.choose (cen_proj_sing (PG := PG) a b c z x CPQ.abc_ncol CPQ.az_neq CPQ.bz_neq)
 
 theorem cen_proj_map_property
@@ -740,7 +740,7 @@ theorem cen_proj_map_property
   have cpm_property := by
     apply Exists.choose_spec (cen_proj_sing (PG := PG) a b c z x CPQ.abc_ncol CPQ.az_neq CPQ.bz_neq)
   unfold cen_proj_map
-  rw [← singleton_subset_iff]
+  rw [<- singleton_subset_iff]
   rw [<- cpm_property]
   unfold central_projection
   simp only [preimage_inter, inter_subset_left]
@@ -751,7 +751,7 @@ theorem cen_proj_arg_col
   (z : star ell a b)
   [CPQ : CentralProjectionQuadruple ell a b c z]
   (x : star ell a c) :
-    ell (cen_proj_map (ell := ell) a b c z x) x z:= by
+    ell (cen_proj_map (ell := ell) a b c z x) x z := by
   apply star_imp_ell
   apply cen_proj_map_property
 
@@ -770,28 +770,99 @@ instance cpq_symmetry
   az_neq := by exact CentralProjectionQuadruple.bz_neq c
   bz_neq := by exact CentralProjectionQuadruple.az_neq c
 
+-- set_option pp.deepTerms.threshold 10
+-- set_option pp.proofs.threshold 40
+
+#check Set.singleton 1
+
+set_option trace.split.failure true
+
+-- theorem test
+--   [PG : ProjectiveGeometry G ell]
+--   (a b c : G)
+--   (z : star ell a b)
+--   (x : star ell a c)
+--   (y : star ell b c) :
+--     if y.val = z.val then x.val = y.val else ell y z x := by
+--   split
+--   next yz_eq => sorry
+--   next yz_neq => sorry
+--   #exit
+
 theorem cen_proj_bij
   [PG : ProjectiveGeometry G ell]
   [CPQ : CentralProjectionQuadruple ell a b c z] :
     Function.Bijective (cen_proj_map (ell := ell) a b c z) := by
+  set φ := cen_proj_map a b c z
   have zp_sym :
       z.val ∈ star ell b a := by
     rw [<- p_6 (ell := ell) a b]
     exact z.property
-  let inverse := (cen_proj_map (ell := ell) b a c ⟨z, zp_sym⟩)
+  set ψ := (cen_proj_map b a c ⟨z, zp_sym⟩)
   rw [Function.bijective_iff_has_inverse]
-  use inverse
+  use ψ
   constructor
-  · unfold Function.LeftInverse
-    intro x
-    unfold_let
-    have col := by apply cen_proj_arg_col a b c z x
-    have col_sym := by apply cen_proj_arg_col (ell := ell) b a c ⟨z, zp_sym⟩ (cen_proj_map (ell := ell) a b c z x)
-    sorry
+  · intro x
+    set y := φ x
+    have col : ell x y z := by
+      apply rel_sym_bac (ell := ell) y x z PG.l1 PG.l2 (cen_proj_arg_col a b c z x)
+    have col_sym : ell (ψ y) y z := by
+      apply cen_proj_arg_col (ell := ell) b a c ⟨z, zp_sym⟩ (cen_proj_map (ell := ell) a b c z x)
+    have ψ_sing : ∃ y_1, central_projection b a c z ell y = {y_1} := by
+      apply cen_proj_sing (PG := PG) b a c ⟨z, zp_sym⟩ y _ CPQ.bz_neq CPQ.az_neq
+      intro bac_col
+      apply CPQ.abc_ncol
+      apply rel_sym_bac b a c PG.l1 PG.l2 bac_col
+    -- unfold central_projection at ψ_sing
+    choose y' yz_ac_inter using ψ_sing
+    have cpm_property := by
+      apply Exists.choose_spec (cen_proj_sing (PG := PG) b a c ⟨z, zp_sym⟩ (cen_proj_map a b c z x) _ CPQ.bz_neq CPQ.az_neq)
+      intro bac_col
+      apply CPQ.abc_ncol
+      apply rel_sym_bac b a c PG.l1 PG.l2 bac_col
+    have ψ_eq_y' : ψ y = y' := by
+      unfold ψ
+      unfold y
+      unfold φ
+      unfold cen_proj_map
+      rw [<- Set.singleton_eq_singleton_iff]
+      rw [<- cpm_property]
+      unfold central_projection
+      exact yz_ac_inter
+    have x_eq_y' : x = y' := by
+      rw [<- Set.singleton_eq_singleton_iff]
+      rw [<- yz_ac_inter]
+      rw [Subset.antisymm_iff]
+      constructor
+      · simp
+        constructor
+        · sorry
+        · sorry
+      · intro y'
+        intro y'_in_cp
+        simp
+        simp at y'_in_cp
+        unfold central_projection at y'_in_cp
+        have y'_in_cp : y'.val ∈ star ell y z ∧ y'.val ∈ star ell a c := by
+          exact y'_in_cp
+        have y'_in_yz : y'.val ∈ star ell y z := by
+          exact mem_of_mem_inter_right (id (And.symm y'_in_cp))
+        have y'_in_ac : y'.val ∈ star ell a c := by
+          exact Subtype.coe_prop y'
+        have x_in_yz : x.val ∈ star ell y z := by
+          refine p_4 y.val ↑z ↑x ?a_in_bc ?ab_neq
+          · simp
+            split
+            next zx_eq => sorry
+            next xz_neq => sorry
+          · sorry
+        sorry
+        -- #exit
+    rw [<- x_eq_y'] at ψ_eq_y'
+    exact ψ_eq_y'
   · unfold Function.RightInverse
     unfold Function.LeftInverse
     intro y
-    unfold_let
     sorry
 
 end Basic
