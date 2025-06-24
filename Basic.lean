@@ -638,25 +638,31 @@ theorem abc_inter_sing
     · apply PG.l1 a b
     · apply PG.l1 a c
 
+class CentralProjectionQuadruple
+  (ell : G → G → G → Prop)
+  (a b c : G)
+  (z : star ell a b) where
+  abc_ncol : ¬ ell a b c
+  az_neq : a ≠ z
+  bz_neq : b ≠ z
+
 theorem cen_proj_sing
   [PG : ProjectiveGeometry G ell]
   (a b c : G)
   (z : star ell a b)
-  (x : star ell a c)
-  (abc_ncol : ¬ ell a b c)
-  (az_neq : a ≠ z)
-  (bz_neq : b ≠ z) :
+  [CPQ : CentralProjectionQuadruple ell a b c z]
+  (x : star ell a c) :
     ∃ y, central_projection a b c z ell x = {y} := by
   have z_nin_ac :
       z.val ∉ star ell a c := by
-    have inter_eq_a := by apply abc_inter_sing (ell := ell) a b c abc_ncol
+    have inter_eq_a := by apply abc_inter_sing (ell := ell) a b c CPQ.abc_ncol
     intro z_in_ac
     let zp := z.property
     have z_in_inter :
         z.val ∈ star ell a b ∩ star ell a c := by
       exact mem_inter zp z_in_ac
     rw [inter_eq_a] at z_in_inter
-    exact id (Ne.symm az_neq) z_in_inter
+    exact id (Ne.symm CPQ.az_neq) z_in_inter
   have z_nin_cb :
       z.val ∉ star ell c b := by
     have bca_ncol :
@@ -665,7 +671,7 @@ theorem cen_proj_sing
       have abc_col :
           ell a b c := by
         apply rel_sym_cab b c a PG.l1 PG.l2 bca_col
-      exact abc_ncol abc_col
+      exact CPQ.abc_ncol abc_col
     have inter_eq_b := by apply abc_inter_sing (ell := ell) b c a bca_ncol
     intro z_in_cb
     rw [p_6 c b] at z_in_cb
@@ -675,7 +681,7 @@ theorem cen_proj_sing
         z.val ∈ star ell b c ∩ star ell a b := by
       exact mem_inter z_in_cb zp
     rw [inter_eq_b] at z_in_inter
-    exact id (Ne.symm bz_neq) z_in_inter
+    exact id (Ne.symm CPQ.bz_neq) z_in_inter
   -- rw [ncard_eq_one]
   -- (x ⋆ z) ∩ (b ⋆ c) ≠ ∅ by P₃
   have nempty :
@@ -686,7 +692,7 @@ theorem cen_proj_sing
     · apply p_4
       · rw [p_6 (ell := ell) b a]
         exact z.property
-      · exact id (Ne.symm bz_neq)
+      · exact id (Ne.symm CPQ.bz_neq)
     · intro xz_eq
       rw [<- xz_eq] at z_nin_ac
       exact z_nin_ac x.property
@@ -712,13 +718,7 @@ theorem cen_proj_sing
     apply eq_of_subset_of_subset
     all_goals simp
 
-class CentralProjectionQuadruple
-  (ell : G → G → G → Prop)
-  (a b c : G)
-  (z : star ell a b) where
-  abc_ncol : ¬ ell a b c
-  az_neq : a ≠ z
-  bz_neq : b ≠ z
+#check cen_proj_sing
 
 noncomputable def cen_proj_map
   [PG : ProjectiveGeometry G ell]
@@ -728,7 +728,7 @@ noncomputable def cen_proj_map
   (x : star ell a c) :
     star ell b c :=
   -- (cen_proj_sing (PG := PG) a b c z x CPQ.abc_ncol CPQ.az_neq CPQ.bz_neq).choose
-  Exists.choose (cen_proj_sing (PG := PG) a b c z x CPQ.abc_ncol CPQ.az_neq CPQ.bz_neq)
+  Exists.choose (cen_proj_sing (PG := PG) a b c z (CPQ := CPQ) x)
 
 theorem cen_proj_map_property
   [PG : ProjectiveGeometry G ell]
@@ -738,7 +738,7 @@ theorem cen_proj_map_property
   (x : star ell a c) :
     cen_proj_map (ell := ell) a b c z x ∈ Subtype.val ⁻¹' star ell x z := by
   have cpm_property := by
-    apply Exists.choose_spec (cen_proj_sing (PG := PG) a b c z x CPQ.abc_ncol CPQ.az_neq CPQ.bz_neq)
+    apply Exists.choose_spec (cen_proj_sing (PG := PG) a b c z (CPQ := CPQ) x)
   unfold cen_proj_map
   rw [<- singleton_subset_iff]
   rw [<- cpm_property]
@@ -773,21 +773,7 @@ instance cpq_symmetry
 -- set_option pp.deepTerms.threshold 10
 -- set_option pp.proofs.threshold 40
 
-#check Set.singleton 1
-
 set_option trace.split.failure true
-
--- theorem test
---   [PG : ProjectiveGeometry G ell]
---   (a b c : G)
---   (z : star ell a b)
---   (x : star ell a c)
---   (y : star ell b c) :
---     if y.val = z.val then x.val = y.val else ell y z x := by
---   split
---   next yz_eq => sorry
---   next yz_neq => sorry
---   #exit
 
 theorem cen_proj_bij
   [PG : ProjectiveGeometry G ell]
