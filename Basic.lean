@@ -10,11 +10,14 @@ namespace Basic
 -- A projective geometry is a set G together with a ternary relation
 -- ℓ ⊆ G × G × G satisfying L₁, L₂ and L₃. (p. 26)
 class ProjectiveGeometry
-  (G : Type u)
+  (G : Type*)
   (ell : G → G → G → Prop) where
   l1  : ∀ a b , ell a b a
   l2  : ∀ a b p q , ell a p q → ell b p q → p ≠ q → ell a b p
   l3  : ∀ a b c d p, ell p a b → ell p c d → ∃ q, ell q a c ∧ ell q b d
+
+variable {G : Type*}
+variable {ell : G → G → G → Prop}
 
 -- Any ternary relation ℓ which satisfies L₁ and L₂ is symmetric. From
 -- "ℓ(a, b, c)", ell feeded with any permutations of "abc" can be proved.
@@ -222,6 +225,10 @@ theorem l1_l2_eq_imp_l3
 -- satisfying ℓ₁(a, b, c) iff ℓ₂(ga, gb, gc). When G₁ = G₂ one says that
 -- g is a collineation. (p. 27)
 class PG_Iso
+  {G₁ : Type*}
+  {G₂ : Type*}
+  {ell₁ : G₁ → G₁ → G₁ → Prop}
+  {ell₂ : G₂ → G₂ → G₂ → Prop}
   [ProjectiveGeometry G₁ ell₁]
   [ProjectiveGeometry G₂ ell₂]
   (f : G₁ → G₂) where
@@ -543,9 +550,6 @@ theorem p_9
               exact c_in_bd q_in_bd
             apply p_4 c q a c_in_qa cq_neq
 
--- set_option diagnostics true
--- set_option diagnostics.threshold 10000
-
 def central_projection
   (a b c z : G)
   (ell : G → G → G → Prop)
@@ -639,7 +643,6 @@ theorem abc_inter_sing
     · apply PG.l1 a c
 
 class CentralProjectionQuadruple
-  (ell : G → G → G → Prop)
   (a b c : G)
   (z : star ell a b) where
   abc_ncol : ¬ ell a b c
@@ -650,7 +653,7 @@ theorem cen_proj_sing
   [PG : ProjectiveGeometry G ell]
   (a b c : G)
   (z : star ell a b)
-  [CPQ : CentralProjectionQuadruple ell a b c z]
+  [CPQ : CentralProjectionQuadruple a b c z]
   (x : star ell a c) :
     ∃ y, central_projection a b c z ell x = {y} := by
   have z_nin_ac :
@@ -718,13 +721,11 @@ theorem cen_proj_sing
     apply eq_of_subset_of_subset
     all_goals simp
 
-#check cen_proj_sing
-
 noncomputable def cen_proj_map
   [PG : ProjectiveGeometry G ell]
   (a b c : G)
   (z : star ell a b)
-  [CPQ : CentralProjectionQuadruple ell a b c z]
+  [CPQ : CentralProjectionQuadruple a b c z]
   (x : star ell a c) :
     star ell b c :=
   -- (cen_proj_sing (PG := PG) a b c z x CPQ.abc_ncol CPQ.az_neq CPQ.bz_neq).choose
@@ -734,7 +735,7 @@ theorem cen_proj_map_property
   [PG : ProjectiveGeometry G ell]
   (a b c : G)
   (z : star ell a b)
-  [CPQ : CentralProjectionQuadruple ell a b c z]
+  [CPQ : CentralProjectionQuadruple a b c z]
   (x : star ell a c) :
     cen_proj_map (ell := ell) a b c z x ∈ Subtype.val ⁻¹' star ell x z := by
   have cpm_property := by
@@ -749,7 +750,7 @@ theorem cen_proj_arg_col
   [PG : ProjectiveGeometry G ell]
   (a b c : G)
   (z : star ell a b)
-  [CPQ : CentralProjectionQuadruple ell a b c z]
+  [CPQ : CentralProjectionQuadruple a b c z]
   (x : star ell a c) :
     ell (cen_proj_map (ell := ell) a b c z x) x z := by
   apply star_imp_ell
@@ -757,12 +758,14 @@ theorem cen_proj_arg_col
 
 instance cpq_symmetry
   [PG : ProjectiveGeometry G ell]
-  [CPQ : CentralProjectionQuadruple ell a b c z] :
+  (a b c : G)
+  (z : star ell a b)
+  [CPQ : CentralProjectionQuadruple a b c z] :
     have zp_sym :
         z.val ∈ star ell b a := by
       rw [<- p_6 (ell := ell) a b]
       exact z.property
-    CentralProjectionQuadruple ell b a c ⟨z.val, zp_sym⟩ where
+    CentralProjectionQuadruple b a c ⟨z.val, zp_sym⟩ where
   abc_ncol := by
     intro bac_col
     apply CPQ.abc_ncol
@@ -777,7 +780,9 @@ set_option trace.split.failure true
 
 theorem cen_proj_bij
   [PG : ProjectiveGeometry G ell]
-  [CPQ : CentralProjectionQuadruple ell a b c z] :
+  (a b c : G)
+  (z : star ell a b)
+  [CPQ : CentralProjectionQuadruple a b c z] :
     Function.Bijective (cen_proj_map (ell := ell) a b c z) := by
   set φ := cen_proj_map a b c z
   have zp_sym :
@@ -795,17 +800,11 @@ theorem cen_proj_bij
     have col_sym : ell (ψ y) y z := by
       apply cen_proj_arg_col (ell := ell) b a c ⟨z, zp_sym⟩ (cen_proj_map (ell := ell) a b c z x)
     have ψ_sing : ∃ y_1, central_projection b a c z ell y = {y_1} := by
-      apply cen_proj_sing (PG := PG) b a c ⟨z, zp_sym⟩ y _ CPQ.bz_neq CPQ.az_neq
-      intro bac_col
-      apply CPQ.abc_ncol
-      apply rel_sym_bac b a c PG.l1 PG.l2 bac_col
+      apply cen_proj_sing (PG := PG) b a c ⟨z, zp_sym⟩ y
     -- unfold central_projection at ψ_sing
     choose y' yz_ac_inter using ψ_sing
     have cpm_property := by
-      apply Exists.choose_spec (cen_proj_sing (PG := PG) b a c ⟨z, zp_sym⟩ (cen_proj_map a b c z x) _ CPQ.bz_neq CPQ.az_neq)
-      intro bac_col
-      apply CPQ.abc_ncol
-      apply rel_sym_bac b a c PG.l1 PG.l2 bac_col
+      apply Exists.choose_spec (cen_proj_sing (PG := PG) b a c ⟨z, zp_sym⟩ (cen_proj_map a b c z x))
     have ψ_eq_y' : ψ y = y' := by
       unfold ψ
       unfold y
