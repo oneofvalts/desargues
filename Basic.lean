@@ -89,8 +89,10 @@ theorem rel_sym_cba
   apply rel_sym_bac a b c l1 l2
   exact abc_col
 
+variable [PG : ProjectiveGeometry G ell]
+
 theorem ncol_imp_neq
-  [PG : ProjectiveGeometry G ell]
+  -- [PG : ProjectiveGeometry G ell]
   (a b c : G)
   (abc_ncol : ¬ ell a b c):
     a ≠ b ∧ a ≠ c ∧ b ≠ c := by
@@ -235,6 +237,8 @@ class PG_Iso
   bij      : Function.Bijective f
   pres_col : ∀ (a b c : G₁), ell₁ a b c ↔ ell₂ (f a) (f b) (f c)
 
+
+section star
 variable [DecidableEq G]
 
 -- Let G = (G, ℓ) be a projective geometry. Then the operator ⋆ : G × G →
@@ -247,15 +251,19 @@ def star
     Set G :=
   {c : G | if a = b then c = a else ell a b c}
 
-theorem p_1
-  [ProjectiveGeometry G ell]
-  (a : G) :
-    star ell a a = {a} := by
-  unfold star
-  simp
+-- theorem p_1
+--   -- [ProjectiveGeometry G ell]
+--   (a : G) :
+--     star ell a a = {a} := by
+--   unfold star
+--   simp
 
-theorem p_2
-  [PG : ProjectiveGeometry G ell] :
+end star
+
+variable [DecidableEq G]
+
+theorem p_2 :
+  -- [PG : ProjectiveGeometry G ell] :
     ∀ a b, a ∈ star ell b a := by
   intro a b
   unfold star
@@ -270,7 +278,7 @@ theorem p_2
       apply rel_sym_bca a b a PG.l1 PG.l2 (PG.l1 a b)
 
 theorem star_imp_ell
-  [PG : ProjectiveGeometry G ell]
+  -- [PG : ProjectiveGeometry G ell]
   (x y z : G)
   (x_in_yz : x ∈ star ell y z) :
     ell x y z := by
@@ -284,7 +292,7 @@ theorem star_imp_ell
       apply rel_sym_cab y z x PG.l1 PG.l2 x_in_yz
 
 theorem p_3
-  [PG : ProjectiveGeometry G ell]
+  -- [PG : ProjectiveGeometry G ell]
   (a b c d p : G)
   (a_in_bp : a ∈ star ell b p)
   (p_in_cd : p ∈ star ell c d)
@@ -369,7 +377,7 @@ theorem p_3
       exact q_in_inter
 
 theorem p_4
-  [ProjectiveGeometry G ell]
+  -- [ProjectiveGeometry G ell]
   (a b c : G)
   (a_in_bc : a ∈ star ell b c)
   (ab_neq : a ≠ b) :
@@ -382,7 +390,7 @@ theorem p_4
   apply inter_nempty
 
 theorem p_5
-  [PG : ProjectiveGeometry G ell]
+  -- [PG : ProjectiveGeometry G ell]
   (a b c : G)
   (a_in_bc : a ∈ star ell b c) :
     star ell a b ⊆ star ell b c := by
@@ -436,7 +444,7 @@ theorem p_5
           apply inter_nempty
 
 theorem p_6
-  [ProjectiveGeometry G ell]
+  -- [ProjectiveGeometry G ell]
   (a b : G) :
     star ell a b = star ell b a := by
   apply eq_of_subset_of_subset
@@ -444,7 +452,7 @@ theorem p_6
   · apply p_5 b a b (p_2 b a)
 
 theorem p_7
-  [ProjectiveGeometry G ell]
+  -- [ProjectiveGeometry G ell]
   (a b c : G)
   (a_in_bc : a ∈ star ell b c)
   (ab_neq : a ≠ b) :
@@ -460,7 +468,7 @@ theorem p_7
     exact c_in_ba
 
 theorem p_8
-  [ProjectiveGeometry G ell]
+  -- [ProjectiveGeometry G ell]
   (a b c d : G)
   (a_in_cd : a ∈ star ell c d)
   (b_in_cd : b ∈ star ell c d)
@@ -473,7 +481,7 @@ theorem p_8
       rw [<- p_7 a b c a_in_cd ab_neq]
 
 theorem p_9
-  [PG : ProjectiveGeometry G ell]
+  -- [PG : ProjectiveGeometry G ell]
   (a b c d p : G)
   (a_in_bp : a ∈ star ell b p)
   (p_in_cd : p ∈ star ell c d) :
@@ -558,7 +566,7 @@ def central_projection
   Subtype.val ⁻¹' (star ell x z ∩ star ell b c)
 
 theorem star_nempty_and_neq_imp_sing
-  [PG : ProjectiveGeometry G ell]
+  -- [PG : ProjectiveGeometry G ell]
   (a b c d : G)
   (nempty : star ell a b ∩ star ell c d ≠ ∅)
   (neq : star ell a b ≠ star ell c d) :
@@ -596,7 +604,7 @@ theorem star_nempty_and_neq_imp_sing
     exact mem_inter x_in_ab x_in_cd
 
 theorem abc_inter_sing
-  [PG : ProjectiveGeometry G ell]
+  -- [PG : ProjectiveGeometry G ell]
   (a b c : G)
   (abc_ncol : ¬ ell a b c) :
     star ell a b ∩ star ell a c = {a} := by
@@ -650,7 +658,7 @@ class CentralProjectionQuadruple
   bz_neq : b ≠ z
 
 theorem cen_proj_sing
-  [PG : ProjectiveGeometry G ell]
+  -- [PG : ProjectiveGeometry G ell]
   (a b c : G)
   (z : star ell a b)
   [CPQ : CentralProjectionQuadruple a b c z]
@@ -722,7 +730,7 @@ theorem cen_proj_sing
     all_goals simp
 
 noncomputable def cen_proj_map
-  [PG : ProjectiveGeometry G ell]
+  -- [PG : ProjectiveGeometry G ell]
   (a b c : G)
   (z : star ell a b)
   [CPQ : CentralProjectionQuadruple a b c z]
@@ -732,7 +740,7 @@ noncomputable def cen_proj_map
   Exists.choose (cen_proj_sing (PG := PG) a b c z (CPQ := CPQ) x)
 
 theorem cen_proj_map_property
-  [PG : ProjectiveGeometry G ell]
+  -- [PG : ProjectiveGeometry G ell]
   (a b c : G)
   (z : star ell a b)
   [CPQ : CentralProjectionQuadruple a b c z]
@@ -747,7 +755,7 @@ theorem cen_proj_map_property
   simp only [preimage_inter, inter_subset_left]
 
 theorem cen_proj_arg_col
-  [PG : ProjectiveGeometry G ell]
+  -- [PG : ProjectiveGeometry G ell]
   (a b c : G)
   (z : star ell a b)
   [CPQ : CentralProjectionQuadruple a b c z]
@@ -757,7 +765,7 @@ theorem cen_proj_arg_col
   apply cen_proj_map_property
 
 instance cpq_symmetry
-  [PG : ProjectiveGeometry G ell]
+  -- [PG : ProjectiveGeometry G ell]
   (a b c : G)
   (z : star ell a b)
   [CPQ : CentralProjectionQuadruple a b c z] :
@@ -779,7 +787,7 @@ instance cpq_symmetry
 set_option trace.split.failure true
 
 theorem cen_proj_bij
-  [PG : ProjectiveGeometry G ell]
+  -- [PG : ProjectiveGeometry G ell]
   (a b c : G)
   (z : star ell a b)
   [CPQ : CentralProjectionQuadruple a b c z] :
