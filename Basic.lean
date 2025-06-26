@@ -91,6 +91,17 @@ theorem rel_sym_cba
 
 variable [PG : ProjectiveGeometry G ell]
 
+syntax "rel_sym" : tactic
+
+macro_rules
+| `(tactic| rel_sym) => `(tactic| first
+  | assumption
+  | apply rel_sym_acb _ _ _ PG.l1 PG.l2 <;> assumption
+  | apply rel_sym_cab _ _ _ PG.l1 PG.l2 <;> assumption
+  | apply rel_sym_bca _ _ _ PG.l1 PG.l2 <;> assumption
+  | apply rel_sym_bac _ _ _ PG.l1 PG.l2 <;> assumption
+  | apply rel_sym_cba _ _ _ PG.l1 PG.l2 <;> assumption)
+
 theorem ncol_imp_neq
   -- [PG : ProjectiveGeometry G ell]
   (a b c : G)
@@ -238,7 +249,6 @@ class PG_Iso
   pres_col : ∀ (a b c : G₁), ell₁ a b c ↔ ell₂ (f a) (f b) (f c)
 
 
-section star
 variable [DecidableEq G]
 
 -- Let G = (G, ℓ) be a projective geometry. Then the operator ⋆ : G × G →
@@ -257,10 +267,6 @@ def star
 --     star ell a a = {a} := by
 --   unfold star
 --   simp
-
-end star
-
-variable [DecidableEq G]
 
 theorem p_2 :
   -- [PG : ProjectiveGeometry G ell] :
@@ -289,7 +295,8 @@ theorem star_imp_ell
     case inr.isTrue eq => apply yz_neq at eq; contradiction
     case inr.isFalse _ =>
       simp at x_in_yz
-      apply rel_sym_cab y z x PG.l1 PG.l2 x_in_yz
+      rel_sym
+      -- apply rel_sym_cab y z x PG.l1 PG.l2 x_in_yz
 
 theorem p_3
   -- [PG : ProjectiveGeometry G ell]
@@ -310,7 +317,8 @@ theorem p_3
           apply ac_neq at eq
           contradiction
         case left.isFalse neq =>
-          apply rel_sym_acb a b c PG.l1 PG.l2 abc_col
+          rel_sym
+          -- apply rel_sym_acb a b c PG.l1 PG.l2 abc_col
       · intro _
         apply PG.l1 b d
     rw [inter_empty] at b_in_inter
@@ -349,12 +357,14 @@ theorem p_3
       apply rel_sym_acb a c b PG.l1 PG.l2
       apply PG.l2 a c b p
       · exact abp_col
-      · apply rel_sym_bca p c b PG.l1 PG.l2 pcd_col
+      · rel_sym
+        -- apply rel_sym_bca p c b PG.l1 PG.l2 pcd_col
       · exact bp_neq
     have q_ex :
         ∃ q, ell q a c ∧ ell q b d := by
       apply PG.l3 a b c d p
-      · apply rel_sym_cab a b p PG.l1 PG.l2 abp_col
+      · rel_sym
+        -- apply rel_sym_cab a b p PG.l1 PG.l2 abp_col
       · exact pcd_col
     match q_ex with
     | ⟨q, qac_col, qbd_col⟩ =>
@@ -367,12 +377,14 @@ theorem p_3
           case left.isTrue ac_eq =>
             contradiction
           case left.isFalse _ =>
-            apply rel_sym_bca q a c PG.l1 PG.l2 qac_col
+            rel_sym
+            -- apply rel_sym_bca q a c PG.l1 PG.l2 qac_col
         · split
           case right.isTrue bd_eq =>
             contradiction
           case right.isFalse _ =>
-            apply rel_sym_bca q b d PG.l1 PG.l2 qbd_col
+            rel_sym
+            -- apply rel_sym_bca q b d PG.l1 PG.l2 qbd_col
       rw [inter_empty] at q_in_inter
       exact q_in_inter
 
@@ -417,7 +429,8 @@ theorem p_5
           simp
           split
           · contradiction
-          · apply rel_sym_bca p b c PG.l1 PG.l2 c_in_ab
+          · rel_sym
+            -- apply rel_sym_bca p b c PG.l1 PG.l2 c_in_ab
       · obtain rfl | pc_neq := eq_or_ne p c
         · unfold star
           simp
@@ -639,7 +652,8 @@ theorem abc_inter_sing
                 apply PG.l1 c a
               · exact b_in_ab
             apply abc_ncol
-            apply rel_sym_bca c a b PG.l1 PG.l2 cab_col
+            rel_sym
+            -- apply rel_sym_bca c a b PG.l1 PG.l2 cab_col
       simp at ax_neq_neq
       exact id (Eq.symm ax_neq_neq)
   · intro x x_in_a; simp at x_in_a; rw [x_in_a]
@@ -681,7 +695,8 @@ theorem cen_proj_sing
       intro bca_col
       have abc_col :
           ell a b c := by
-        apply rel_sym_cab b c a PG.l1 PG.l2 bca_col
+        rel_sym
+        -- apply rel_sym_cab b c a PG.l1 PG.l2 bca_col
       exact CPQ.abc_ncol abc_col
     have inter_eq_b := by apply abc_inter_sing (ell := ell) b c a bca_ncol
     intro z_in_cb
@@ -777,7 +792,8 @@ instance cpq_symmetry
   abc_ncol := by
     intro bac_col
     apply CPQ.abc_ncol
-    apply rel_sym_bac b a c PG.l1 PG.l2 bac_col
+    rel_sym
+    -- apply rel_sym_bac b a c PG.l1 PG.l2 bac_col
   az_neq := by exact CentralProjectionQuadruple.bz_neq c
   bz_neq := by exact CentralProjectionQuadruple.az_neq c
 
