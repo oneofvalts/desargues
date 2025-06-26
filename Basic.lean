@@ -667,7 +667,7 @@ theorem nin_arm :
   rw [inter_eq_a] at z_in_inter
   exact id (Ne.symm CPQ.az_neq) z_in_inter
 
-theorem nin_leg :
+theorem nin_wall :
     z.val ∉ star ell c b := by
   have bca_ncol :
       ¬ell b c a := by
@@ -706,7 +706,7 @@ theorem cen_proj_sing :
   have z_nin_ac :
       z.val ∉ star ell a c := by apply nin_arm
   have z_nin_cb :
-      z.val ∉ star ell c b := by apply nin_leg
+      z.val ∉ star ell c b := by apply nin_wall
   -- (x ⋆ z) ∩ (b ⋆ c) ≠ ∅ by P₃
   have nempty :
       star ell x.val z ∩ star ell c b ≠ ∅ := by apply shadow_exists
