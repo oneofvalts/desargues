@@ -656,50 +656,60 @@ instance cpq_symmetry :
 
 variable (x : star ell a c)
 
+theorem nin_arm :
+    z.val ∉ star ell a c := by
+  have inter_eq_a := by apply abc_inter_sing a b c CPQ.abc_ncol
+  intro z_in_ac
+  let zp := z.property
+  have z_in_inter :
+      z.val ∈ star ell a b ∩ star ell a c := by
+    exact mem_inter zp z_in_ac
+  rw [inter_eq_a] at z_in_inter
+  exact id (Ne.symm CPQ.az_neq) z_in_inter
+
+theorem nin_leg :
+    z.val ∉ star ell c b := by
+  have bca_ncol :
+      ¬ell b c a := by
+    intro bca_col
+    have abc_col :
+        ell a b c := by
+      rel_sym
+    exact CPQ.abc_ncol abc_col
+  have inter_eq_b := by apply abc_inter_sing b c a bca_ncol
+  intro z_in_cb
+  rw [p_6 c b] at z_in_cb
+  rw [<- p_6 a b] at inter_eq_b
+  let zp := z.property
+  have z_in_inter :
+      z.val ∈ star ell b c ∩ star ell a b := by
+    exact mem_inter z_in_cb zp
+  rw [inter_eq_b] at z_in_inter
+  exact id (Ne.symm CPQ.bz_neq) z_in_inter
+
+theorem shadow_exists :
+    star ell x.val z ∩ star ell c b ≠ ∅ := by
+  apply p_3 x.val c z b a
+  · rw [p_6 c a]
+    exact x.property
+  · apply p_4
+    · rw [p_6 b a]
+      exact z.property
+    · exact id (Ne.symm CPQ.bz_neq)
+  · intro xz_eq
+    have z_nin_ac : z.val ∉ star ell a c := by apply nin_arm
+    rw [<- xz_eq] at z_nin_ac
+    exact z_nin_ac x.property
+
 theorem cen_proj_sing :
     ∃ y, central_projection a b c z x = {y} := by
   have z_nin_ac :
-      z.val ∉ star ell a c := by
-    have inter_eq_a := by apply abc_inter_sing a b c CPQ.abc_ncol
-    intro z_in_ac
-    let zp := z.property
-    have z_in_inter :
-        z.val ∈ star ell a b ∩ star ell a c := by
-      exact mem_inter zp z_in_ac
-    rw [inter_eq_a] at z_in_inter
-    exact id (Ne.symm CPQ.az_neq) z_in_inter
+      z.val ∉ star ell a c := by apply nin_arm
   have z_nin_cb :
-      z.val ∉ star ell c b := by
-    have bca_ncol :
-        ¬ell b c a := by
-      intro bca_col
-      have abc_col :
-          ell a b c := by
-        rel_sym
-      exact CPQ.abc_ncol abc_col
-    have inter_eq_b := by apply abc_inter_sing b c a bca_ncol
-    intro z_in_cb
-    rw [p_6 c b] at z_in_cb
-    rw [<- p_6 a b] at inter_eq_b
-    let zp := z.property
-    have z_in_inter :
-        z.val ∈ star ell b c ∩ star ell a b := by
-      exact mem_inter z_in_cb zp
-    rw [inter_eq_b] at z_in_inter
-    exact id (Ne.symm CPQ.bz_neq) z_in_inter
+      z.val ∉ star ell c b := by apply nin_leg
   -- (x ⋆ z) ∩ (b ⋆ c) ≠ ∅ by P₃
   have nempty :
-      star ell x.val z ∩ star ell c b ≠ ∅ := by
-    apply p_3 x.val c z b a
-    · rw [p_6 c a]
-      exact x.property
-    · apply p_4
-      · rw [p_6 b a]
-        exact z.property
-      · exact id (Ne.symm CPQ.bz_neq)
-    · intro xz_eq
-      rw [<- xz_eq] at z_nin_ac
-      exact z_nin_ac x.property
+      star ell x.val z ∩ star ell c b ≠ ∅ := by apply shadow_exists
   unfold central_projection
   rw [p_6 b c]
   have xz_neq_cb :
