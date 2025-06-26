@@ -601,8 +601,8 @@ theorem abc_inter_sing
         rw [p_6 a c] at x_in_ac
         have a_in_ba := by apply p_2 (ell := ell) a b
         have a_in_ca := by apply p_2 (ell := ell) a c
-        have ax_eq_ba := by apply p_8 (ell := ell) a x b a a_in_ba x_in_ab ax_neq
-        have ax_eq_ca := by apply p_8 (ell := ell) a x c a a_in_ca x_in_ac ax_neq
+        have ax_eq_ba := by apply p_8 a x b a a_in_ba x_in_ab ax_neq
+        have ax_eq_ca := by apply p_8 a x c a a_in_ca x_in_ac ax_neq
         rw [ax_eq_ca] at ax_eq_ba
         have b_in_ab := by apply p_2 (ell := ell) b a
         rw [p_6 a b] at b_in_ab
@@ -644,7 +644,7 @@ variable [CPQ : CentralProjectionQuadruple a b c z]
 instance cpq_symmetry :
     have zp_sym :
         z.val ∈ star ell b a := by
-      rw [<- p_6 (ell := ell) a b]
+      rw [<- p_6 a b]
       exact z.property
     CentralProjectionQuadruple b a c ⟨z.val, zp_sym⟩ where
   abc_ncol := by
@@ -660,7 +660,7 @@ theorem cen_proj_sing :
     ∃ y, central_projection a b c z x = {y} := by
   have z_nin_ac :
       z.val ∉ star ell a c := by
-    have inter_eq_a := by apply abc_inter_sing (ell := ell) a b c CPQ.abc_ncol
+    have inter_eq_a := by apply abc_inter_sing a b c CPQ.abc_ncol
     intro z_in_ac
     let zp := z.property
     have z_in_inter :
@@ -677,7 +677,7 @@ theorem cen_proj_sing :
           ell a b c := by
         rel_sym
       exact CPQ.abc_ncol abc_col
-    have inter_eq_b := by apply abc_inter_sing (ell := ell) b c a bca_ncol
+    have inter_eq_b := by apply abc_inter_sing b c a bca_ncol
     intro z_in_cb
     rw [p_6 c b] at z_in_cb
     rw [<- p_6 a b] at inter_eq_b
@@ -690,18 +690,18 @@ theorem cen_proj_sing :
   -- (x ⋆ z) ∩ (b ⋆ c) ≠ ∅ by P₃
   have nempty :
       star ell x.val z ∩ star ell c b ≠ ∅ := by
-    apply p_3 (ell := ell) x.val c z b a
-    · rw [p_6 (ell := ell) c a]
+    apply p_3 x.val c z b a
+    · rw [p_6 c a]
       exact x.property
     · apply p_4
-      · rw [p_6 (ell := ell) b a]
+      · rw [p_6 b a]
         exact z.property
       · exact id (Ne.symm CPQ.bz_neq)
     · intro xz_eq
       rw [<- xz_eq] at z_nin_ac
       exact z_nin_ac x.property
   unfold central_projection
-  rw [p_6 (ell := ell) b c]
+  rw [p_6 b c]
   have xz_neq_cb :
       star ell x z ≠ star ell c b := by
     intro xz_eq_cb
@@ -723,12 +723,12 @@ theorem cen_proj_sing :
 
 noncomputable def cen_proj_map :
     star ell b c :=
-  Exists.choose (cen_proj_sing (PG := PG) a b c z (CPQ := CPQ) x)
+  Exists.choose (cen_proj_sing a b c z x)
 
 theorem cen_proj_map_property :
-    cen_proj_map (ell := ell) a b c z x ∈ Subtype.val ⁻¹' star ell x z := by
+    cen_proj_map a b c z x ∈ Subtype.val ⁻¹' star ell x z := by
   have cpm_property := by
-    apply Exists.choose_spec (cen_proj_sing (PG := PG) a b c z (CPQ := CPQ) x)
+    apply Exists.choose_spec (cen_proj_sing a b c z x)
   unfold cen_proj_map
   rw [<- singleton_subset_iff]
   rw [<- cpm_property]
@@ -736,7 +736,7 @@ theorem cen_proj_map_property :
   simp only [preimage_inter, inter_subset_left]
 
 theorem cen_proj_arg_col :
-    ell (cen_proj_map (ell := ell) a b c z x) x z := by
+    ell (cen_proj_map a b c z x) x z := by
   apply star_imp_ell
   apply cen_proj_map_property
 
@@ -744,11 +744,11 @@ theorem cen_proj_bij
   (a b c : G)
   (z : star ell a b)
   [CPQ : CentralProjectionQuadruple a b c z] :
-    Function.Bijective (cen_proj_map (ell := ell) a b c z) := by
+    Function.Bijective (cen_proj_map a b c z) := by
   set φ := cen_proj_map a b c z
   have zp_sym :
       z.val ∈ star ell b a := by
-    rw [<- p_6 (ell := ell) a b]
+    rw [<- p_6 a b]
     exact z.property
   set ψ := (cen_proj_map b a c ⟨z, zp_sym⟩)
   rw [Function.bijective_iff_has_inverse]
@@ -759,13 +759,13 @@ theorem cen_proj_bij
     have col : ell x y z := by
       apply rel_sym_bac (ell := ell) y x z PG.l1 PG.l2 (cen_proj_arg_col a b c z x)
     have col_sym : ell (ψ y) y z := by
-      apply cen_proj_arg_col (ell := ell) b a c ⟨z, zp_sym⟩ (cen_proj_map (ell := ell) a b c z x)
+      apply cen_proj_arg_col b a c ⟨z, zp_sym⟩ (cen_proj_map a b c z x)
     have ψ_sing : ∃ y_1, central_projection b a c z y = {y_1} := by
-      apply cen_proj_sing (PG := PG) b a c ⟨z, zp_sym⟩ y
+      apply cen_proj_sing b a c ⟨z, zp_sym⟩ y
     -- unfold central_projection at ψ_sing
     choose y' yz_ac_inter using ψ_sing
     have cpm_property := by
-      apply Exists.choose_spec (cen_proj_sing (PG := PG) b a c ⟨z, zp_sym⟩ (cen_proj_map a b c z x))
+      apply Exists.choose_spec (cen_proj_sing b a c ⟨z, zp_sym⟩ (cen_proj_map a b c z x))
     have ψ_eq_y' : ψ y = y' := by
       unfold ψ
       unfold y
