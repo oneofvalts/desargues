@@ -654,8 +654,6 @@ instance cpq_symmetry :
   az_neq := by exact CentralProjectionQuadruple.bz_neq c
   bz_neq := by exact CentralProjectionQuadruple.az_neq c
 
-variable (x : star ell a c)
-
 theorem nin_arm :
     z.val ∉ star ell a c := by
   have inter_eq_a := by apply abc_inter_sing a b c CPQ.abc_ncol
@@ -687,6 +685,15 @@ theorem nin_wall :
   rw [inter_eq_b] at z_in_inter
   exact id (Ne.symm CPQ.bz_neq) z_in_inter
 
+variable (x : star ell a c)
+
+theorem elbow_center_neq :
+    x.val ≠ z.val := by
+  intro xz_eq
+  have z_nin_ac : z.val ∉ star ell a c := by apply nin_arm
+  rw [<- xz_eq] at z_nin_ac
+  exact z_nin_ac x.property
+
 theorem shadow_exists :
     star ell x.val z ∩ star ell c b ≠ ∅ := by
   apply p_3 x.val c z b a
@@ -696,10 +703,7 @@ theorem shadow_exists :
     · rw [p_6 b a]
       exact z.property
     · exact id (Ne.symm CPQ.bz_neq)
-  · intro xz_eq
-    have z_nin_ac : z.val ∉ star ell a c := by apply nin_arm
-    rw [<- xz_eq] at z_nin_ac
-    exact z_nin_ac x.property
+  · apply elbow_center_neq
 
 theorem cen_proj_sing :
     ∃ y, central_projection a b c z x = {y} := by
@@ -750,10 +754,36 @@ theorem cen_proj_arg_col :
   apply star_imp_ell
   apply cen_proj_map_property
 
-theorem cen_proj_bij
-  (a b c : G)
-  (z : star ell a b)
-  [CPQ : CentralProjectionQuadruple a b c z] :
+theorem shadow_in_light :
+    (cen_proj_map a b c z x).val ∈ star ell x z := by
+  have xz_neq := elbow_center_neq (x := x) (z := z)
+  simp
+  split
+  next xz_eq =>
+    exact False.elim (xz_neq xz_eq)
+  next xz_neq =>
+    have col := cen_proj_arg_col (ell := ell) (a := a) (b := b) (c := c) (z := z) (x := x)
+    rel_sym
+
+theorem shadow_center_neq :
+    (cen_proj_map a b c z x).val ≠ z.val := by
+  set y := cen_proj_map a b c z x
+  intro yz_eq
+  have leg_wall_inter :
+      star ell b a ∩ star ell b c = {b} := by
+    apply abc_inter_sing b a c
+    intro bac_col
+    apply CPQ.abc_ncol
+    rel_sym
+  have y_in_ab := y.property
+  have z_in_ab := z.property
+  rw [<- p_6 a b] at leg_wall_inter
+  rw [yz_eq] at y_in_ab
+  have z_in_inter : z.val ∈ star ell a b ∩ star ell b c := by exact mem_inter z_in_ab y_in_ab
+  rw [leg_wall_inter] at z_in_inter
+  exact CPQ.bz_neq (id (Eq.symm z_in_inter))
+
+theorem cen_proj_bij :
     Function.Bijective (cen_proj_map a b c z) := by
   set φ := cen_proj_map a b c z
   have zp_sym :
@@ -772,7 +802,6 @@ theorem cen_proj_bij
       apply cen_proj_arg_col b a c ⟨z, zp_sym⟩ (cen_proj_map a b c z x)
     have ψ_sing : ∃ y_1, central_projection b a c z y = {y_1} := by
       apply cen_proj_sing b a c ⟨z, zp_sym⟩ y
-    -- unfold central_projection at ψ_sing
     choose y' yz_ac_inter using ψ_sing
     have cpm_property := by
       apply Exists.choose_spec (cen_proj_sing b a c ⟨z, zp_sym⟩ (cen_proj_map a b c z x))
@@ -792,27 +821,38 @@ theorem cen_proj_bij
       constructor
       · simp
         constructor
-        · sorry
-        · sorry
-      · intro y'
+        · apply p_4
+          · rw [p_6]
+            exact shadow_in_light a b c z x
+          · apply shadow_center_neq
+        · exact Subtype.coe_prop x
+      · clear yz_ac_inter ψ_eq_y' y'
+        intro y'
         intro y'_in_cp
         simp
-        simp at y'_in_cp
         unfold central_projection at y'_in_cp
-        have y'_in_cp : y'.val ∈ star ell y z ∧ y'.val ∈ star ell a c := by
-          exact y'_in_cp
-        have y'_in_yz : y'.val ∈ star ell y z := by
-          exact mem_of_mem_inter_right (id (And.symm y'_in_cp))
-        have y'_in_ac : y'.val ∈ star ell a c := by
-          exact Subtype.coe_prop y'
+        -- have y'_in_inter : y'.val ∈ star ell y z ∧ y'.val ∈ star ell a c := by
+        --   exact y'_in_cp
+        -- have y'_in_yz : y'.val ∈ star ell y z := by
+        --   exact mem_of_mem_inter_right (id (And.symm y'_in_cp))
+        -- have y'_in_ac : y'.val ∈ star ell a c := by
+        --   exact Subtype.coe_prop y'
         have x_in_yz : x.val ∈ star ell y z := by
           refine p_4 y.val ↑z ↑x ?a_in_bc ?ab_neq
           · simp
+            have zx_neq := elbow_center_neq (x := x) (z := z)
             split
-            next zx_eq => sorry
-            next xz_neq => sorry
-          · sorry
-        sorry
+            next zx_eq => exact False.elim (zx_neq (id (Eq.symm zx_eq)))
+            next xz_neq => rel_sym
+          · apply shadow_center_neq
+        have something := cen_proj_sing b a c ⟨z, zp_sym⟩ y
+        choose foo bar using something
+        unfold central_projection at bar
+        have ogg := x.property
+        have x_in_inter : x.val ∈ star ell y z ∩ star ell a c := by exact mem_inter x_in_yz ogg
+        refine Subtype.eq ?_
+        have x_foo_eq : x = foo := by
+        --sorry
     rw [<- x_eq_y'] at ψ_eq_y'
     exact ψ_eq_y'
   · unfold Function.RightInverse
