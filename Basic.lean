@@ -796,68 +796,53 @@ theorem cen_proj_bij :
   constructor
   · intro x
     set y := φ x
-    have col : ell x y z := by
-      apply rel_sym_bac (ell := ell) y x z PG.l1 PG.l2 (cen_proj_arg_col a b c z x)
-    have col_sym : ell (ψ y) y z := by
-      apply cen_proj_arg_col b a c ⟨z, zp_sym⟩ (cen_proj_map a b c z x)
-    have ψ_sing : ∃ y_1, central_projection b a c z y = {y_1} := by
-      apply cen_proj_sing b a c ⟨z, zp_sym⟩ y
-    choose y' yz_ac_inter using ψ_sing
-    have cpm_property := by
-      apply Exists.choose_spec (cen_proj_sing b a c ⟨z, zp_sym⟩ (cen_proj_map a b c z x))
-    have ψ_eq_y' : ψ y = y' := by
-      unfold ψ
-      unfold y
-      unfold φ
-      unfold cen_proj_map
-      rw [<- Set.singleton_eq_singleton_iff]
-      rw [<- cpm_property]
-      unfold central_projection
-      exact yz_ac_inter
-    have x_eq_y' : x = y' := by
-      rw [<- Set.singleton_eq_singleton_iff]
-      rw [<- yz_ac_inter]
-      rw [Subset.antisymm_iff]
-      constructor
-      · simp
-        constructor
-        · apply p_4
-          · rw [p_6]
-            exact shadow_in_light a b c z x
-          · apply shadow_center_neq
-        · exact Subtype.coe_prop x
-      · clear yz_ac_inter ψ_eq_y' y'
-        intro y'
-        intro y'_in_cp
+    have y_in_xz : y.val ∈ star ell x z := by exact shadow_in_light a b c z x
+    have x_in_yz : x.val ∈ star ell y z := by
+      apply p_4 (ell := ell) y z x
+      · rw [p_6 z.val x]
+        exact y_in_xz
+      · exact shadow_center_neq a b c z x
+    have ψy_in_yz : (ψ y).val ∈ star ell y z := by exact shadow_in_light b a c ⟨z, zp_sym⟩ y
+    have ac_yz_inter_sing := by apply cen_proj_sing b a c ⟨z, zp_sym⟩ y
+    unfold central_projection at ac_yz_inter_sing
+    have x_in_inter : x.val ∈ star ell y z ∩ star ell a c := by
+      apply mem_inter
+      · exact x_in_yz
+      · exact Subtype.coe_prop x
+    have ψy_in_inter : (ψ y).val ∈ star ell y z ∩ star ell a c := by
+      apply mem_inter
+      · exact ψy_in_yz
+      · exact Subtype.coe_prop (ψ y)
+    have yz_neq : y.val ≠ z := by exact shadow_center_neq a b c z x
+    have ncol_neq : a ≠ b ∧ a ≠ c ∧ b ≠ c := by
+      apply ncol_imp_neq (ell := ell) a b c
+      exact CPQ.abc_ncol
+    have ac_neq : a ≠ c := by grind
+    cases ac_yz_inter_sing with
+    | intro yy yy_sing =>
+      simp only [preimage] at yy_sing
+      have x_in_yy : x ∈ ({yy} : Set _)  := by
+        rw [<- yy_sing]
         simp
-        unfold central_projection at y'_in_cp
-        -- have y'_in_inter : y'.val ∈ star ell y z ∧ y'.val ∈ star ell a c := by
-        --   exact y'_in_cp
-        -- have y'_in_yz : y'.val ∈ star ell y z := by
-        --   exact mem_of_mem_inter_right (id (And.symm y'_in_cp))
-        -- have y'_in_ac : y'.val ∈ star ell a c := by
-        --   exact Subtype.coe_prop y'
-        have x_in_yz : x.val ∈ star ell y z := by
-          refine p_4 y.val ↑z ↑x ?a_in_bc ?ab_neq
-          · simp
-            have zx_neq := elbow_center_neq (x := x) (z := z)
-            split
-            next zx_eq => exact False.elim (zx_neq (id (Eq.symm zx_eq)))
-            next xz_neq => rel_sym
-          · apply shadow_center_neq
-        have something := cen_proj_sing b a c ⟨z, zp_sym⟩ y
-        choose foo bar using something
-        unfold central_projection at bar
-        have ogg := x.property
-        have x_in_inter : x.val ∈ star ell y z ∩ star ell a c := by exact mem_inter x_in_yz ogg
-        refine Subtype.eq ?_
-        have x_foo_eq : x = foo := by
-        --sorry
-    rw [<- x_eq_y'] at ψ_eq_y'
-    exact ψ_eq_y'
-  · unfold Function.RightInverse
-    unfold Function.LeftInverse
-    intro y
+        split
+        next yz_eq => exact False.elim (yz_neq yz_eq)
+        next _ =>
+          have yxz_col : ell y x z := by apply cen_proj_arg_col
+          rel_sym
+      have ψy_in_yy : ψ y ∈ ({yy} : Set _)  := by
+        rw [<- yy_sing]
+        simp
+        split
+        next yz_eq => exact False.elim (yz_neq yz_eq)
+        next _=>
+          have foo := by apply cen_proj_arg_col (ell := ell) b a c ⟨z, zp_sym⟩ y
+          simp at foo
+          rel_sym
+      have x_eq_yy : x = yy := by exact x_in_yy
+      have ψy_eq_yy : ψ y = yy := by exact ψy_in_yy
+      rw [<- x_eq_yy] at ψy_eq_yy
+      exact ψy_eq_yy
+  · intro y
     sorry
 
 end Basic
