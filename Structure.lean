@@ -1,20 +1,21 @@
 import Basic
-import LeanCopilot
 
 open Set
 open Basic
 
 namespace Structure
 
+variable {G : Type*}
+variable {ell : G → G → G → Prop}
+variable [PG : ProjectiveGeometry G ell]
+
 class ProjectiveSubgeometry
-  (PG : ProjectiveGeometry G ell)
   (G' : Set G) where
   ell' : G' → G' → G' → Prop
   restriction : ∀ a b c : G', ell' a b c = ell a b c
   inst : ProjectiveGeometry G' ell'
 
 theorem subspace_l1
-  [PG : ProjectiveGeometry G ell]
   (E : Set G)
   (ell' : E → E → E → Prop)
   (restriction : ∀ a b c : E, ell' a b c = ell a b c)
@@ -24,7 +25,6 @@ theorem subspace_l1
   apply PG.l1 a b
 
 theorem subspace_l2
-  [PG : ProjectiveGeometry G ell]
   (E : Set G)
   (ell' : E → E → E → Prop)
   (restriction : ∀ a b c : E, ell' a b c = ell a b c)
@@ -42,17 +42,17 @@ theorem subspace_l2
   contradiction
 
 variable [DecidableEq G]
+variable {E : Set G}
 
 class Subspace
-  (PG : ProjectiveGeometry G ell)
   (E : Set G) where
-  closure : ∀ a b, a ∈ E → b ∈ E → star (ell := ell) a b ⊆ E
+  closure : ∀ a b, a ∈ E → b ∈ E → star ell a b ⊆ E
+
+variable [S : Subspace E]
 
 -- It is trivial that every subspace is a projective subgeometry.
-instance
-  [PG : ProjectiveGeometry G ell]
-  [S : Subspace PG E] :
-    ProjectiveSubgeometry PG E where
+instance :
+    ProjectiveSubgeometry (ell := ell) E where
   ell' := fun a b c => E.restrict (E.restrict (E.restrict ell a) b) c
 
   -- restriction is trivial.
@@ -85,7 +85,7 @@ instance
     { apply PG.l3 a b c d p pab_col pcd_col }
   by_cases deq : (a = b ∨ a = c ∨ a = d ∨ a = p ∨ b = c ∨ b = d ∨ b = p
                 ∨ c = d ∨ c = p ∨ d = p)
-  · apply l1_l2_eq_imp_l3 ell' a b c d p _ _ deq pab_col pcd_col
+  · apply l1_l2_eq_imp_l3 a b c d p _ _ deq pab_col pcd_col
     · intro a b
       apply subspace_l1 (ell := ell) E ell' _ a b
       exact fun a b c ↦ rfl
@@ -96,7 +96,7 @@ instance
     match q_ex with
     | ⟨q, qac_col, qbd_col⟩ =>
       have q_in_ac :
-          q ∈ star (ell := ell) a c := by
+          q ∈ star ell a c := by
         simp
         split
         case isTrue aacc_eq =>
@@ -111,7 +111,7 @@ instance
             apply PG.l2 a b p q apq_col bpq_col pq_neq
           · exact qac_col
       have ac_subseteq_E :
-          star (ell := ell) a c ⊆ E := by
+          star ell a c ⊆ E := by
         apply S.closure a c a.property c.property
       apply ac_subseteq_E at q_in_ac
       use ⟨q, q_in_ac⟩
@@ -121,9 +121,8 @@ instance
 -- In fact, I prove a general statement: Every star is a subspace. This means
 -- singletons, too, are subspaces.
 instance
-  [PG : ProjectiveGeometry G ell]
   (a b : G) :
-    Subspace PG (star (ell := ell) a b)  where
+    Subspace (ell := ell) (star ell a b)  where
   closure := by
     intro x y x_in_ab y_in_ab z z_in_xy
     by_cases xy_neq : x = y
@@ -143,7 +142,7 @@ def galaxy
   [ProjectiveGeometry G ell]
   (b c a : G) :
     Set G :=
-  sUnion {star (ell := ell) a x | x ∈ star (ell := ell) b c}
+  sUnion {star ell a x | x ∈ star ell b c}
 
 -- Planes are subspaces will follow from 2.4.4, but it is a useful exercise to
 -- prove it now, using the properties (P_i). As similar to above, I will prove
@@ -151,7 +150,7 @@ def galaxy
 instance
   [PG : ProjectiveGeometry G ell]
   (b c a: G) :
-    Subspace PG (galaxy (ell := ell) b c a)  where
+    Subspace (ell := ell) (galaxy (ell := ell) b c a)  where
   closure := by
     intro k l k_in_ab l_in_ab m m_in_xy
     unfold galaxy at k_in_ab
