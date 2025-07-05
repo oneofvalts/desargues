@@ -797,27 +797,9 @@ theorem cen_proj_bij :
   · intro x
     set y := φ x
     have y_in_xz : y.val ∈ star ell x z := by exact shadow_in_light a b c z x
-    have x_in_yz : x.val ∈ star ell y z := by
-      apply p_4 (ell := ell) y z x
-      · rw [p_6 z.val x]
-        exact y_in_xz
-      · exact shadow_center_neq a b c z x
-    have ψy_in_yz : (ψ y).val ∈ star ell y z := by exact shadow_in_light b a c ⟨z, zp_sym⟩ y
     have ac_yz_inter_sing := by apply cen_proj_sing b a c ⟨z, zp_sym⟩ y
     unfold central_projection at ac_yz_inter_sing
-    have x_in_inter : x.val ∈ star ell y z ∩ star ell a c := by
-      apply mem_inter
-      · exact x_in_yz
-      · exact Subtype.coe_prop x
-    have ψy_in_inter : (ψ y).val ∈ star ell y z ∩ star ell a c := by
-      apply mem_inter
-      · exact ψy_in_yz
-      · exact Subtype.coe_prop (ψ y)
     have yz_neq : y.val ≠ z := by exact shadow_center_neq a b c z x
-    have ncol_neq : a ≠ b ∧ a ≠ c ∧ b ≠ c := by
-      apply ncol_imp_neq (ell := ell) a b c
-      exact CPQ.abc_ncol
-    have ac_neq : a ≠ c := by grind
     cases ac_yz_inter_sing with
     | intro yy yy_sing =>
       simp only [preimage] at yy_sing
@@ -836,7 +818,6 @@ theorem cen_proj_bij :
         next yz_eq => exact False.elim (yz_neq yz_eq)
         next _=>
           have foo := by apply cen_proj_arg_col (ell := ell) b a c ⟨z, zp_sym⟩ y
-          simp at foo
           rel_sym
       have x_eq_yy : x = yy := by exact x_in_yy
       have ψy_eq_yy : ψ y = yy := by exact ψy_in_yy
