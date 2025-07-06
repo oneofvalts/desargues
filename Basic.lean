@@ -459,11 +459,11 @@ theorem p_8
   (b_in_cd : b ∈ star ell c d)
   (ab_neq : a ≠ b) :
     star ell a b = star ell c d := by
-    obtain rfl | bc_neq := eq_or_ne b c
-    · rw [p_7 a b d a_in_cd ab_neq]
-    · rw [<- p_7 b c d b_in_cd bc_neq]
-      rw [<- p_7 b c d b_in_cd bc_neq] at a_in_cd
-      rw [<- p_7 a b c a_in_cd ab_neq]
+  obtain rfl | bc_neq := eq_or_ne b c
+  · rw [p_7 a b d a_in_cd ab_neq]
+  · rw [<- p_7 b c d b_in_cd bc_neq]
+    rw [<- p_7 b c d b_in_cd bc_neq] at a_in_cd
+    rw [<- p_7 a b c a_in_cd ab_neq]
 
 theorem p_9
   (a b c d p : G)
@@ -783,6 +783,44 @@ theorem shadow_center_neq :
   rw [leg_wall_inter] at z_in_inter
   exact CPQ.bz_neq (id (Eq.symm z_in_inter))
 
+theorem cen_proj_left :
+    let φ := cen_proj_map a b c z
+    have zp_sym :
+        z.val ∈ star ell b a := by
+      rw [<- p_6 a b]
+      exact z.property
+    let ψ := cen_proj_map b a c ⟨z, zp_sym⟩
+    Function.LeftInverse ψ φ := by
+  intro φ zp_sym ψ x
+  set y := φ x
+  have y_in_xz : y.val ∈ star ell x z := by exact shadow_in_light a b c z x
+  have ac_yz_inter_sing := by apply cen_proj_sing b a c ⟨z, zp_sym⟩ y
+  have yz_neq : y.val ≠ z := by exact shadow_center_neq a b c z x
+  unfold central_projection at ac_yz_inter_sing
+  cases ac_yz_inter_sing with
+  | intro yy yy_sing =>
+    simp only [preimage] at yy_sing
+    have x_in_yy : x ∈ ({yy} : Set _)  := by
+      rw [<- yy_sing]
+      simp
+      split
+      next yz_eq => exact False.elim (yz_neq yz_eq)
+      next _ =>
+        have yxz_col : ell y x z := by apply cen_proj_arg_col
+        rel_sym
+    have ψy_in_yy : ψ y ∈ ({yy} : Set _)  := by
+      rw [<- yy_sing]
+      simp
+      split
+      next yz_eq => exact False.elim (yz_neq yz_eq)
+      next _=>
+        have foo := by apply cen_proj_arg_col (ell := ell) b a c ⟨z, zp_sym⟩ y
+        rel_sym
+    have x_eq_yy : x = yy := by exact x_in_yy
+    have ψy_eq_yy : ψ y = yy := by exact ψy_in_yy
+    rw [<- x_eq_yy] at ψy_eq_yy
+    exact ψy_eq_yy
+
 theorem cen_proj_bij :
     Function.Bijective (cen_proj_map a b c z) := by
   set φ := cen_proj_map a b c z
@@ -793,63 +831,6 @@ theorem cen_proj_bij :
   set ψ := (cen_proj_map b a c ⟨z, zp_sym⟩)
   rw [Function.bijective_iff_has_inverse]
   use ψ
-  constructor
-  · intro x
-    set y := φ x
-    have y_in_xz : y.val ∈ star ell x z := by exact shadow_in_light a b c z x
-    have ac_yz_inter_sing := by apply cen_proj_sing b a c ⟨z, zp_sym⟩ y
-    have yz_neq : y.val ≠ z := by exact shadow_center_neq a b c z x
-    unfold central_projection at ac_yz_inter_sing
-    cases ac_yz_inter_sing with
-    | intro yy yy_sing =>
-      simp only [preimage] at yy_sing
-      have x_in_yy : x ∈ ({yy} : Set _)  := by
-        rw [<- yy_sing]
-        simp
-        split
-        next yz_eq => exact False.elim (yz_neq yz_eq)
-        next _ =>
-          have yxz_col : ell y x z := by apply cen_proj_arg_col
-          rel_sym
-      have ψy_in_yy : ψ y ∈ ({yy} : Set _)  := by
-        rw [<- yy_sing]
-        simp
-        split
-        next yz_eq => exact False.elim (yz_neq yz_eq)
-        next _=>
-          have foo := by apply cen_proj_arg_col (ell := ell) b a c ⟨z, zp_sym⟩ y
-          rel_sym
-      have x_eq_yy : x = yy := by exact x_in_yy
-      have ψy_eq_yy : ψ y = yy := by exact ψy_in_yy
-      rw [<- x_eq_yy] at ψy_eq_yy
-      exact ψy_eq_yy
-  · intro y
-    set x := ψ y
-    have x_in_yz : x.val ∈ star ell y z := by exact shadow_in_light b a c ⟨z, zp_sym⟩ y
-    have bc_xz_inter_sing := by apply cen_proj_sing a b c z x
-    have xz_neq : x.val ≠ z := by exact shadow_center_neq b a c ⟨z, zp_sym⟩ y
-    unfold central_projection at bc_xz_inter_sing
-    cases bc_xz_inter_sing with
-    | intro xx xx_sing =>
-      simp only [preimage] at xx_sing
-      have y_in_xx : y ∈ ({xx} : Set _)  := by
-        rw [<- xx_sing]
-        simp
-        split
-        next xz_eq => exact False.elim (xz_neq xz_eq)
-        next _ =>
-          have xyz_col : ell x y z := by apply cen_proj_arg_col b a c ⟨z, zp_sym⟩
-          rel_sym
-      have φx_in_xx : φ x ∈ ({xx} : Set _)  := by
-        rw [<- xx_sing]
-        simp
-        split
-        next xz_eq => exact False.elim (xz_neq xz_eq)
-        next _=>
-          have foo := by apply cen_proj_arg_col (ell := ell) a b c z x
-          rel_sym
-      have y_eq_xx : y = xx := by exact y_in_xx
-      have φx_eq_xx : φ x = xx := by exact φx_in_xx
-      rw [<- y_eq_xx] at φx_eq_xx
-      exact φx_eq_xx
+  constructor <;> apply cen_proj_left
+
 end Basic
