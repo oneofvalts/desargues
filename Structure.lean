@@ -153,9 +153,12 @@ instance
     Subspace (ell := ell) (galaxy (ell := ell) b c a)  where
   closure := by
     intro k l k_in_ab l_in_ab m m_in_xy
-    unfold galaxy at k_in_ab
-    unfold galaxy at l_in_ab
+    unfold galaxy at k_in_ab l_in_ab
+    rw [mem_sUnion] at k_in_ab l_in_ab
     unfold galaxy
+    rw [mem_sUnion]
+    match k_in_ab with
+    | ⟨foo, ⟨foo_in_set, bar⟩⟩ =>
     simp
 
 end Structure
