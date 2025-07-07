@@ -751,7 +751,7 @@ theorem shadow_in_light :
   next xz_eq =>
     exact False.elim (xz_neq xz_eq)
   next xz_neq =>
-    have col := cen_proj_arg_col (ell := ell) (a := a) (b := b) (c := c) (z := z) (x := x)
+    have col := cen_proj_arg_col (a := a) (b := b) (c := c) (z := z) (x := x)
     rel_sym
 
 theorem shadow_center_neq :
@@ -802,8 +802,8 @@ theorem cen_proj_left :
       simp
       split
       next yz_eq => exact False.elim (yz_neq yz_eq)
-      next _=>
-        have foo := by apply cen_proj_arg_col (ell := ell) b a c ⟨z, zp_sym⟩ y
+      next _ =>
+        have _ := by apply cen_proj_arg_col b a c ⟨z, zp_sym⟩ y
         rel_sym
     have x_eq_yy : x = yy := by exact x_in_yy
     have ψy_eq_yy : ψ y = yy := by exact ψy_in_yy
@@ -829,7 +829,21 @@ theorem c_in_ac
 
 theorem φa_eq_b :
     φ ⟨a, a_in_ac⟩ = b := by
-  sorry
+  have b_inter := by
+    apply abc_inter_sing (ell := ell ) b a c
+    intro bac_col
+    apply CPQ.abc_ncol
+    rel_sym
+  rw [p_6 b a] at b_inter
+  have φa_in_ab := by apply shadow_in_light a b c z ⟨a, a_in_ac⟩
+  have az_eq_ab := by
+    apply p_8 (ell := ell) a z a b (by rw [p_6]; exact p_2 a b) z.property CPQ.az_neq
+  rw [az_eq_ab] at φa_in_ab
+  have φa_in_bc := (φ ⟨a, a_in_ac⟩).property
+  have φa_in_inter : (φ ⟨a, a_in_ac⟩).val ∈ star ell a b ∩ star ell b c := by
+    constructor <;> assumption
+  rw [b_inter] at φa_in_inter
+  exact φa_in_inter
 
 theorem φc_eq_c :
     φ ⟨c, c_in_ac⟩ = c := by
