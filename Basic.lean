@@ -627,11 +627,14 @@ variable (a b c : G)
 variable (z : star ell a b)
 variable [CPQ : CentralProjectionQuadruple a b c z]
 
+theorem zp_sym
+  {a b : G}
+  {z : star ell a b} :
+    z.val ∈ star ell b a := by
+  rw [<- p_6 a b]
+  exact z.property
+
 instance cpq_symmetry :
-    have zp_sym :
-        z.val ∈ star ell b a := by
-      rw [<- p_6 a b]
-      exact z.property
     CentralProjectionQuadruple b a c ⟨z.val, zp_sym⟩ where
   abc_ncol := by
     intro bac_col
@@ -769,15 +772,15 @@ theorem shadow_center_neq :
   rw [leg_wall_inter] at z_in_inter
   exact CPQ.bz_neq (id (Eq.symm z_in_inter))
 
+noncomputable def φ := cen_proj_map a b c z
+noncomputable def ψ := cen_proj_map b a c ⟨z, zp_sym⟩
+
+local notation "φ" => φ a b c z
+local notation "ψ" => ψ a b c z
+
 theorem cen_proj_left :
-    let φ := cen_proj_map a b c z
-    have zp_sym :
-        z.val ∈ star ell b a := by
-      rw [<- p_6 a b]
-      exact z.property
-    let ψ := cen_proj_map b a c ⟨z, zp_sym⟩
     Function.LeftInverse ψ φ := by
-  intro φ zp_sym ψ x
+  intro x
   set y := φ x
   have y_in_xz : y.val ∈ star ell x z := by exact shadow_in_light a b c z x
   have ac_yz_inter_sing := by apply cen_proj_sing b a c ⟨z, zp_sym⟩ y
@@ -808,15 +811,28 @@ theorem cen_proj_left :
     exact ψy_eq_yy
 
 theorem cen_proj_bij :
-    Function.Bijective (cen_proj_map a b c z) := by
-  set φ := cen_proj_map a b c z
-  have zp_sym :
-      z.val ∈ star ell b a := by
-    rw [<- p_6 a b]
-    exact z.property
-  set ψ := (cen_proj_map b a c ⟨z, zp_sym⟩)
+    Function.Bijective φ := by
   rw [Function.bijective_iff_has_inverse]
   use ψ
   constructor <;> apply cen_proj_left
+
+theorem a_in_ac
+  {a c : G} :
+    a ∈ star ell a c := by
+  rw [p_6]
+  exact p_2 a c
+
+theorem c_in_ac
+  {a c : G} :
+    c ∈ star ell a c := by
+  exact p_2 c a
+
+theorem φa_eq_b :
+    φ ⟨a, a_in_ac⟩ = b := by
+  sorry
+
+theorem φc_eq_c :
+    φ ⟨c, c_in_ac⟩ = c := by
+  sorry
 
 end Basic
