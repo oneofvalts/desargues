@@ -847,6 +847,36 @@ theorem φa_eq_b :
 
 theorem φc_eq_c :
     φ ⟨c, c_in_ac⟩ = c := by
-  sorry
+  have c_inter : star ell c z ∩ star ell c b = {c} := by
+    apply abc_inter_sing c z b
+    intro czb_col
+    have z_in_bc : z.val ∈ star ell b c := by
+      simp
+      split
+      next bc_eq =>
+        have abc_neq := by apply ncol_imp_neq a b c CPQ.abc_ncol
+        match abc_neq with
+        | ⟨_, _, bc_neq⟩ => exact False.elim (bc_neq bc_eq)
+      next _ => rel_sym
+    have z_in_ba : z.val ∈ star ell b a := by rw [p_6]; exact z.property
+    have b_inter := by
+      apply abc_inter_sing (ell := ell ) b a c
+      intro bac_col
+      apply CPQ.abc_ncol
+      rel_sym
+    have z_in_inter : z.val ∈ star ell b a ∩ star ell b c := by
+      constructor <;> assumption
+    rw [b_inter] at z_in_inter
+    simp at z_in_inter
+    apply CPQ.bz_neq
+    exact id (Eq.symm z_in_inter)
+  rw [p_6 c b] at c_inter
+  have φc_in_cz : (φ ⟨c, c_in_ac⟩).val ∈ star ell c z := by
+    apply shadow_in_light a b c z ⟨c, c_in_ac⟩
+  have φc_in_bc := (φ ⟨c, c_in_ac⟩).property
+  have φc_in_inter : (φ ⟨c, c_in_ac⟩).val ∈ star ell c z ∩ star ell b c := by
+    constructor <;> assumption
+  rw [c_inter] at φc_in_inter
+  exact φc_in_inter
 
 end Basic
