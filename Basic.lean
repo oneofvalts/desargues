@@ -725,8 +725,9 @@ theorem cen_proj_sing :
     use ⟨y, y_in_cb⟩
     rw [y_in_inter]
     apply eq_of_subset_of_subset
-    all_goals simp only [star, coe_setOf, mem_setOf_eq, singleton_subset_iff, mem_preimage,
-      mem_singleton_iff]
+    all_goals simp only [star, coe_setOf, mem_setOf_eq, subset_singleton_iff, mem_preimage,
+      mem_singleton_iff, Subtype.forall, Subtype.mk.injEq, imp_self, implies_true]
+    simp only [singleton_subset_iff, mem_preimage, mem_singleton_iff]
 
 noncomputable def cen_proj_map :
     star ell b c :=
