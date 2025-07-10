@@ -58,7 +58,7 @@ instance :
   -- restriction is trivial.
   restriction := by
     intro a b c
-    simp
+    simp only [restrict_apply]
 
   inst := ⟨
   by
@@ -97,7 +97,7 @@ instance :
     | ⟨q, qac_col, qbd_col⟩ =>
       have q_in_ac :
           q ∈ star ell a c := by
-        simp
+        simp only [star, mem_setOf_eq]
         split
         case isTrue aacc_eq =>
           have ac_eq : a = c := by { exact SetCoe.ext aacc_eq }
@@ -133,13 +133,10 @@ instance
       exact z_in_xy
     case pos =>
       rw [xy_neq] at z_in_xy
-      simp at z_in_xy
-      rw [<- xy_neq] at z_in_xy
-      rw [z_in_xy]
-      exact x_in_ab
+      simp only [star, ↓reduceIte, setOf_eq_eq_singleton, mem_singleton_iff] at z_in_xy
+      exact mem_of_eq_of_mem z_in_xy y_in_ab
 
 def galaxy
-  [ProjectiveGeometry G ell]
   (b c a : G) :
     Set G :=
   sUnion {star ell a x | x ∈ star ell b c}
@@ -153,12 +150,24 @@ instance
     Subspace (ell := ell) (galaxy (ell := ell) b c a)  where
   closure := by
     intro k l k_in_ab l_in_ab m m_in_xy
-    unfold galaxy at k_in_ab l_in_ab
-    rw [mem_sUnion] at k_in_ab l_in_ab
+    obtain ⟨K, K_def, k_def⟩ := k_in_ab
+    obtain ⟨L, L_def, l_def⟩ := l_in_ab
+    obtain ⟨xₖ, ⟨xₖ_def, K_def⟩⟩ := K_def
+    obtain ⟨xₗ, ⟨xₗ_def, L_def⟩⟩ := L_def
+    rw [<- K_def] at k_def
+    rw [<- L_def] at l_def
     unfold galaxy
     rw [mem_sUnion]
-    match k_in_ab with
-    | ⟨foo, ⟨foo_in_set, bar⟩⟩ =>
-    simp
+    use (star ell a ?xₘ)
+    simp only [star, mem_setOf_eq]
+    · constructor
+      · use ?xₘ
+        constructor
+        · split
+          next bc_eq => sorry
+          next bc_neq => sorry
+        · rfl
+      · sorry
+    · sorry
 
 end Structure
