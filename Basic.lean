@@ -185,18 +185,18 @@ class ProjectiveGeometry
   l2  : ∀ a b p q , ell a p q → ell b p q → p ≠ q → ell a b p
   l3  : ∀ a b c d p, ell p a b → ell p c d → ∃ q, ell q a c ∧ ell q b d
 
-variable [PG : ProjectiveGeometry G ell]
-
 syntax "rel_sym" : tactic
 
 macro_rules
 | `(tactic| rel_sym) => `(tactic| first
   | assumption
-  | apply rel_sym_acb _ _ _ PG.l1 PG.l2 <;> assumption
-  | apply rel_sym_cab _ _ _ PG.l1 PG.l2 <;> assumption
-  | apply rel_sym_bca _ _ _ PG.l1 PG.l2 <;> assumption
-  | apply rel_sym_bac _ _ _ PG.l1 PG.l2 <;> assumption
-  | apply rel_sym_cba _ _ _ PG.l1 PG.l2 <;> assumption)
+  | apply rel_sym_acb _ _ _ ProjectiveGeometry.l1 ProjectiveGeometry.l2 <;> assumption
+  | apply rel_sym_cab _ _ _ ProjectiveGeometry.l1 ProjectiveGeometry.l2 <;> assumption
+  | apply rel_sym_bca _ _ _ ProjectiveGeometry.l1 ProjectiveGeometry.l2 <;> assumption
+  | apply rel_sym_bac _ _ _ ProjectiveGeometry.l1 ProjectiveGeometry.l2 <;> assumption
+  | apply rel_sym_cba _ _ _ ProjectiveGeometry.l1 ProjectiveGeometry.l2 <;> assumption)
+
+variable [PG : ProjectiveGeometry G ell]
 
 theorem ncol_imp_neq
   (a b c : G)

@@ -145,7 +145,6 @@ def galaxy
 -- prove it now, using the properties (P_i). As similar to above, I will prove
 -- more generally that galaxies are subspaces.
 instance
-  [PG : ProjectiveGeometry G ell]
   (b c a: G) :
     Subspace (ell := ell) (galaxy (ell := ell) b c a)  where
   closure := by
@@ -158,16 +157,17 @@ instance
     rw [<- L_def] at l_def
     unfold galaxy
     rw [mem_sUnion]
-    use (star ell a ?xₘ)
-    simp only [star, mem_setOf_eq]
-    · constructor
-      · use ?xₘ
-        constructor
-        · split
-          next bc_eq => sorry
-          next bc_neq => sorry
-        · rfl
-      · sorry
-    · sorry
+    -- We split the proof into two cases where one is the degenerate
+    -- configuration and the other is not. If a, b, c are collinear, then we
+    -- actually do not have a real galaxy. We either have a line, or a single
+    -- point. This case is already solved above, we will get an appropriate
+    -- instance and then use the closure.
+    by_cases abc_col : ell a b c
+    · have bc_subspace : Subspace (ell := ell) (star ell b c) := inferInstance
+      let closure := bc_subspace.closure
+      sorry
+    -- In the real case, we will use abc_inter_sing or a variant.
+    · rename ¬ ell a b c => abc_ncol
+      sorry
 
 end Structure
