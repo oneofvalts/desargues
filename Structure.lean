@@ -142,8 +142,12 @@ def galaxy
   sUnion {star ell a x | x ∈ star ell b c}
 
 -- Planes are subspaces will follow from 2.4.4, but it is a useful exercise to
--- prove it now, using the properties (P_i). As similar to above, I will prove
--- more generally that galaxies are subspaces.
+-- prove it now, using the properties (P_i).
+-- In fact, it is a special case of 2.4.4 where x₁ = x₂. Appling P₉ three times
+-- (p. 37) still works. But I am not sure the author meant a more refined,
+-- shorter proof when he suggests to exercise. I can't think of one for now.
+-- As similar to above, the general statement that galaxies are subspaces will
+-- be proved.
 instance
   (b c x₁: G) :
     Subspace (ell := ell) (galaxy (ell := ell) b c x₁)  where
@@ -170,7 +174,7 @@ instance
         exact w_in_z₂x₁
       · rw [p_6 y₂ x₁]
         exact z₂_def
-    simp at x_in_x₁x₁
+    simp only [star, ↓reduceIte, setOf_eq_eq_singleton, mem_singleton_iff] at x_in_x₁x₁
     obtain ⟨y, ⟨y_in_y₁y₂, z_in_yx⟩⟩ := by
       apply p_9 (ell := ell) z y₁ x y₂ w
       · rw [p_6 y₁ w]
