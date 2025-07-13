@@ -145,29 +145,57 @@ def galaxy
 -- prove it now, using the properties (P_i). As similar to above, I will prove
 -- more generally that galaxies are subspaces.
 instance
-  (b c a: G) :
-    Subspace (ell := ell) (galaxy (ell := ell) b c a)  where
+  (b c x₁: G) :
+    Subspace (ell := ell) (galaxy (ell := ell) b c x₁)  where
   closure := by
-    intro k l k_in_ab l_in_ab m m_in_xy
-    obtain ⟨K, K_def, k_def⟩ := k_in_ab
-    obtain ⟨L, L_def, l_def⟩ := l_in_ab
-    obtain ⟨xₖ, ⟨xₖ_def, K_def⟩⟩ := K_def
-    obtain ⟨xₗ, ⟨xₗ_def, L_def⟩⟩ := L_def
-    rw [<- K_def] at k_def
-    rw [<- L_def] at l_def
+    intro z₁ z₂ z₁_in_bca z₂_in_bca z z_in_z₁z₂
+    obtain ⟨Z₁, Z₁_def, z₁_def⟩ := z₁_in_bca
+    obtain ⟨Z₂, Z₂_def, z₂_def⟩ := z₂_in_bca
+    obtain ⟨y₁, ⟨y₁_def, Z₁_def⟩⟩ := Z₁_def
+    obtain ⟨y₂, ⟨y₂_def, Z₂_def⟩⟩ := Z₂_def
+    rw [<- Z₁_def] at z₁_def
+    rw [<- Z₂_def] at z₂_def
     unfold galaxy
     rw [mem_sUnion]
-    -- We split the proof into two cases where one is the degenerate
-    -- configuration and the other is not. If a, b, c are collinear, then we
-    -- actually do not have a real galaxy. We either have a line, or a single
-    -- point. This case is already solved above, we will get an appropriate
-    -- instance and then use the closure.
-    by_cases abc_col : ell a b c
-    · have bc_subspace : Subspace (ell := ell) (star ell b c) := inferInstance
-      let closure := bc_subspace.closure
-      sorry
-    -- In the real case, we will use abc_inter_sing or a variant.
-    · rename ¬ ell a b c => abc_ncol
-      sorry
+    obtain ⟨w, ⟨w_in_z₂x₁, z_in_wy₁⟩⟩ := by
+      apply p_9 (ell := ell) z z₂ y₁ x₁ z₁
+      · rw [p_6 z₂ z₁]
+        exact z_in_z₁z₂
+      · rw [p_6 y₁ x₁]
+        exact z₁_def
+    rw [p_6 y₁ w] at z_in_wy₁
+    obtain ⟨x, ⟨x_in_x₁x₁, w_in_xy₂⟩⟩ := by
+      apply p_9 (ell := ell) w x₁ y₂ x₁ z₂
+      · rw [p_6 x₁ z₂]
+        exact w_in_z₂x₁
+      · rw [p_6 y₂ x₁]
+        exact z₂_def
+    simp at x_in_x₁x₁
+    obtain ⟨y, ⟨y_in_y₁y₂, z_in_yx⟩⟩ := by
+      apply p_9 (ell := ell) z y₁ x y₂ w
+      · rw [p_6 y₁ w]
+        exact z_in_wy₁
+      · rw [p_6 x y₂]
+        exact w_in_xy₂
+    use star ell x y
+    simp only [mem_setOf_eq]
+    constructor
+    · use y
+      constructor
+      · obtain rfl | y₁y₂_neq := eq_or_ne y₁ y₂
+        · simp only [star, ↓reduceIte, setOf_eq_eq_singleton, mem_singleton_iff] at y_in_y₁y₂
+          rename y = y₁ => yy₁_eq
+          rw [yy₁_eq]
+          exact y₁_def
+        · have y₁y₂_eq_bc := by
+            apply p_8 (ell := ell) y₁ y₂ b c
+            · exact y₁_def
+            · exact y₂_def
+            · exact y₁y₂_neq
+          rw [<- y₁y₂_eq_bc]
+          exact y_in_y₁y₂
+      · rename x = x₁ => xx₁_eq
+        rw [xx₁_eq]
+    · exact z_in_yx
 
 end Structure
