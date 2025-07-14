@@ -118,6 +118,7 @@ instance :
   ⟩
 
 -- By 2.2.5 (p_8) it follows that every line is a subspace.
+--
 -- In fact, I prove a general statement: Every star is a subspace. This means
 -- singletons, too, are subspaces.
 instance
@@ -143,6 +144,7 @@ def galaxy
 
 -- Planes are subspaces will follow from 2.4.4, but it is a useful exercise to
 -- prove it now, using the properties (P_i).
+--
 -- In fact, it is a special case of 2.4.4 where x₁ = x₂. Appling P₉ three times
 -- (p. 37) still works. But I am not sure the author meant a more refined,
 -- shorter proof when he suggests to exercise. I can't think of one for now.
